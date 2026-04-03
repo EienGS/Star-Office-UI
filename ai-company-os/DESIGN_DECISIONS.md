@@ -340,7 +340,7 @@ Task 结束（Notification: task_complete）
 以下模块已识别，尚未深入设计：
 
 - [x] **Agent 侧设计**：CLAUDE.md 模板完整内容、Hook 脚本实现（见第十一章）
-- [ ] **Office Server 设计**：API 定义、文件监听、自动化逻辑（超时/升级/归档触发）
+- [x] **Office Server 设计**：API 定义、文件监听、自动化逻辑（见第十二章）
 - [ ] **CEO 指令输入**：完整输入能力的技术实现（文字+文件+图片+URL）
 - [ ] **UI 详细设计**：平面图房间划分、Agent 动画、任务卡片交互
 - [ ] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本
@@ -405,6 +405,96 @@ CLAUDE.md 中的所有文件操作都通过这两个变量定位，不硬编码�
 - 不允许将已有代码仓库目录设为 Agent 工作目录
 - Agent 通过配置读取目标代码目录路径，而不是直接住在代码仓库内
 - 好处：代码仓库中随时开 Claude Code 做小任务，不触发任何系统逻辑
+
+---
+
+---
+
+## 十二、Office Server 设计（方向B 确认版）
+
+### 12.1 技术选型
+
+**后端框架：Python + FastAPI**
+- 与现有项目同语言（Python）
+- 原生异步支持，适合文件监听 + SSE 并发
+- 比 Flask 更好的 SSE 和 WebSocket 支持
+
+### 12.2 API 分组
+
+**Agent 管理**
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/agents` | GET | 获取所有 Agent 列表 |
+| `/agents` | POST | 创建 Agent（生成工作目录、注入 CLAUDE.md、注册到 agents.json） |
+| `/agents/[id]` | PATCH | 更新 Agent 动态配置（无需重启 Claude Code） |
+| `/agents/[id]/shutdown` | POST | 触发销毁流程（有任务时返回警告，二次确认后强制） |
+
+**项目管理**
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/projects` | GET/POST | 项目列表 / 创建项目（含自定义阶段定义） |
+| `/projects/[id]` | GET/PATCH | 项目详情 / 更新配置 |
+| `/projects/[id]/board` | GET | 获取看板当前状态 |
+
+**状态与消息**
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/state` | GET | 所有 Agent 实时状态（UI 主轮询备用） |
+| `/state/[agentId]` | POST | Agent 推送自身状态（Hook 脚本调用） |
+| `/messages` | POST | CEO 通过 UI 发送指令 |
+| `/messages/[agentId]` | GET | 获取某 Agent 收件箱 |
+| `/receipts/[msgId]` | GET/POST | 查询 / 写入回执 |
+
+**知识库**
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/knowledge/archive` | GET | 获取归档列表 |
+| `/knowledge/context/[projectId]` | GET | 获取项目上下文摘要 |
+| `/resources` | GET | 获取公共资源注册表 |
+
+**系统**
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/health` | GET | 服务健康检查 |
+| `/events` | GET（SSE） | 前端实时推送通道（替代轮询） |
+
+### 12.3 文件监听规则
+
+| 监听路径 | 变化类型 | 触发动作 |
+|---------|---------|---------|
+| `state/[agentId].json` | 写入 | SSE 推送 UI 状态更新 |
+| `inbox/[agentId]/` | 新文件 | 记录消息创建时间，开始超时计时 |
+| `state/receipts/[msgId].json` | 写入 | 取消对应消息的超时计时，通知发送方 |
+| `tasks/[projectId]/[taskId].json` | 写入 | 更新看板，SSE 推送 UI |
+| `knowledge/archive/` | 新文件 | 标记 Agent 可完成销毁，UI 移除工位 |
+
+### 12.4 自动化调度
+
+```
+消息超时检查（每分钟）
+  → 扫描所有 unread/acknowledged 且超过 timeoutAt 的消息
+  → 自动写 escalation 到 /office/inbox/ceo/
+  → SSE 推送 UI 告警
+
+Agent 状态超时（每30秒）
+  → 检查 state/[agentId].json 的 updatedAt
+  → 超过5分钟无更新 → status 降级为 idle
+  → SSE 推送 UI
+
+归档完成检测
+  → 监听 receipts/ 中 shutdown 消息的回执
+  → status=done → 从 agents.json 移除 Agent
+  → SSE 推送 UI 删除工位
+
+常驻 Agent 并发统计
+  → 维护每个 resident Agent 的 activeTasks 计数
+  → 仅用于 UI 展示，不做并发限制
+```
 
 ---
 
