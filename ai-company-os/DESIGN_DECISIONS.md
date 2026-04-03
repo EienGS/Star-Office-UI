@@ -339,12 +339,57 @@ Task 结束（Notification: task_complete）
 
 以下模块已识别，尚未深入设计：
 
-- [ ] **Agent 侧设计**：CLAUDE.md 模板完整内容、Hook 脚本实现
+- [x] **Agent 侧设计**：CLAUDE.md 模板完整内容、Hook 脚本实现（见第十一章）
 - [ ] **Office Server 设计**：API 定义、文件监听、自动化逻辑（超时/升级/归档触发）
 - [ ] **CEO 指令输入**：完整输入能力的技术实现（文字+文件+图片+URL）
 - [ ] **UI 详细设计**：平面图房间划分、Agent 动画、任务卡片交互
 - [ ] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本
 - [ ] **知识归档格式**：Agent 销毁时归档内容的标准结构
+
+---
+
+---
+
+## 十一、Agent 侧设计（方向A 确认版）
+
+### 11.1 CLAUDE.md 结构原则
+
+**采用方式 B（动态配置分离）：**
+- CLAUDE.md 只写静态通用规范，内容稳定，无需重启生效
+- 动态配置（projectId、role、customInstructions 等）全部存放在 /office/config/agents.json
+- Agent 每次任务开始时主动读取 agents.json 获取最新配置
+- 好处：CEO 在 UI 修改 Agent 配置无需重启 Claude Code 窗口
+
+### 11.2 CLAUDE.md 模板结构
+
+两层组成：
+- 通用规范层（所有 Agent 共享，系统统一维护）
+- 角色身份层（创建时注入 agentId，其余运行时从 agents.json 读取）
+
+**强制行为规范（5条）：**
+1. 任务开始前：读收件箱 + 读看板 + 读项目上下文
+2. 执行中：HIGH 消息当前工具完毕后立即处理
+3. 任务完成后：更新 task 状态 + 写上下文摘要 + 触发下游
+4. 跨 Agent 消息：必须携带完整 context 快照，设置 timeoutAt
+5. 收到 shutdown：归档后回执，不得直接退出
+
+### 11.3 Hook 脚本分工
+
+| Hook 挂载点 | 脚本 | 职责 |
+|------------|------|------|
+| PreToolUse | pre_tool_use.py | 推送 working 状态 + 检查 HIGH 消息 |
+| PostToolUse | post_tool_use.py | 推送状态更新 |
+| Notification: task_complete | on_task_complete.py | 处理 NORMAL 收件箱 + 写上下文摘要 + 触发下游 |
+| Notification: error | on_error.py | 推送 error 状态 + 写 escalation 给 CEO |
+
+### 11.4 环境变量（每个 Claude Code 窗口必须设置）
+
+```
+OFFICE_AGENT_ID=agent-xxx-001
+OFFICE_ROOT=/path/to/office
+```
+
+CLAUDE.md 中的所有文件操作都通过这两个变量定位，不硬编码路径。
 
 ---
 
