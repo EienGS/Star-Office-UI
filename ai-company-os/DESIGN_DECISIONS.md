@@ -293,7 +293,7 @@
 
 ### 6.3 消息类型说明
 
-| type | 发起方 | 含义 | 需要回执 |
+| type | 发起方 | 含义 | 需��回执 |
 |------|--------|------|---------|
 | `task_request` | Agent / CEO | 调用型，要求对方执行任务 | 是 |
 | `task_notify` | Agent | 通知型，告知完成/进展 | 可选 |
@@ -341,7 +341,7 @@ Task 结束（Notification: task_complete）
 
 - [x] **Agent 侧设计**：CLAUDE.md 模板完整内容、Hook 脚本实现（见第十一章）
 - [x] **Office Server 设计**：API 定义、文件监听、自动化逻辑（见第十二章）
-- [ ] **CEO 指令输入**：完整输入能力的技术实现（文字+文件+图片+URL）
+- [x] **CEO 指令输入**：完整输入能力的技术实现（见第十五章）
 - [ ] **UI 详细设计**：平面图房间划分、Agent 动画、任务卡片交互
 - [x] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本（见第十四章）
 - [x] **知识归档格式**：Agent 销毁时归档内容的标准结构（见第十三章）
@@ -681,6 +681,61 @@ CEO 在 UI 创建 Agent 时，后端自动执行生成器，输出两个文件�
   → 在 /office/state/{{agentId}}.json 写入初始状态（idle）
   → SSE 推送 UI：新增工位
 ```
+
+---
+
+---
+
+## 十五、CEO 指令输入（确认版）
+
+### 15.1 输入能力范围
+
+对标 Claude Code 完整输入能力：
+
+| 输入类型 | UI 实现方式 |
+|---------|-----------|
+| 文字 | 多行文本框，支持 Markdown 代码块 |
+| 本地文件 | 文件选择器 + 拖拽上传 |
+| 图片 | 图片上传 + 内联预览 |
+| URL | 文本中自动识别，标记为引用链接 |
+
+### 15.2 附件传递机制
+
+附件走文件系统，消息体只传路径，保持消息轻量：
+
+```
+CEO 上传文件
+  → 后端保存至 /office/attachments/[msgId]/[filename]
+  → 消息 context.relatedFiles 记录绝对路径
+  → Agent 读取消息后通过路径直接访问文件
+  → 不做 base64 编码，不消耗额外 Token
+```
+
+### 15.3 指令模式（确认：方案C）
+
+- **默认：自由文本模式**，直接输入，快速下达
+- **可选展开：结构化补充**，填写关联 projectId / taskId，帮助 Agent 精准定位上下文
+- 两种模式共存，日常用自由文本，复杂交接时补充结构化信息
+
+### 15.4 发送流程
+
+```
+CEO 选择目标 Agent（可多选广播）
+  → 输入文字 + 可选附件
+  → 可选展开填写 projectId / taskId
+  → 点击发送
+  → 后端保存附件到 /office/attachments/[msgId]/
+  → 构建 ceo_directive 消息（priority 默认 HIGH）
+  → 写入 /office/inbox/[agentId]/[msgId].json
+  → Hook 在 Agent 下次工具调用前触发处理
+  → UI 侧边消息面板显示"已发送，等待回执"
+```
+
+### 15.5 回执展示
+
+CEO 发出的每条指令在 UI 消息面板中展示状态流转：
+- 已发送 → acknowledged（Agent 已读）→ done（执行完成）/ failed（执行失败）
+- 超时未响应：UI 告警，自动升级为 escalation
 
 ---
 
