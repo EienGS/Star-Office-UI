@@ -344,7 +344,7 @@ Task 结束（Notification: task_complete）
 - [ ] **CEO 指令输入**：完整输入能力的技术实现（文字+文件+图片+URL）
 - [ ] **UI 详细设计**：平面图房间划分、Agent 动画、任务卡片交互
 - [ ] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本
-- [ ] **知识归档格式**：Agent 销毁时归档内容的标准结构
+- [x] **知识归档格式**：Agent 销毁时归档内容的标准结构（见第十三章）
 
 ---
 
@@ -469,7 +469,7 @@ CLAUDE.md 中的所有文件操作都通过这两个变量定位，不硬编码�
 |---------|---------|---------|
 | `state/[agentId].json` | 写入 | SSE 推送 UI 状态更新 |
 | `inbox/[agentId]/` | 新文件 | 记录消息创建时间，开始超时计时 |
-| `state/receipts/[msgId].json` | 写入 | 取消对应消息的超时计时，通知发送方 |
+| `state/receipts/[msgId].json` | 写入 | 取消对应消息的���时计时，通知发送方 |
 | `tasks/[projectId]/[taskId].json` | 写入 | 更新看板，SSE 推送 UI |
 | `knowledge/archive/` | 新文件 | 标记 Agent 可完成销毁，UI 移除工位 |
 
@@ -494,6 +494,129 @@ Agent 状态超时（每30秒）
 常驻 Agent 并发统计
   → 维护每个 resident Agent 的 activeTasks 计数
   → 仅用于 UI 展示，不做并发限制
+```
+
+---
+
+---
+
+## 十三、知识归档格式（确认版）
+
+### 13.1 系统级原则：节约 Token
+
+**贯穿整个 OS 的设计原则，不只适用于归档：**
+
+| 场景 | 规则 |
+|------|------|
+| 查询归档/知识库 | 先读 `_index.json`，按需读具体文件，禁止全量加载 |
+| 跨 Agent 消息 | context 只携带本次任务相关片段，不携带全项目历史 |
+| 任务摘要写入 | 每个 taskId 独立文件，禁止追加到同一个大文件 |
+| 项目上下文 | 按 taskId 分散存储，不合并为大文档 |
+| CLAUDE.md | 静态规范精简，动态配置运行时按需读取 |
+
+**Agent 查询档案的标准流程（写入 CLAUDE.md 规范）：**
+```
+1. 读 _index.json（仅几百字节）
+2. 根据 keywords / projectId / agentId 过滤出目标文件名
+3. 只读取命中的 1~2 个具体文件
+4. 提取所需内容后，不保留全文在对话上下文中
+```
+
+**明确禁止的行为：**
+- 禁止不读 _index.json 直接扫描目录
+- 禁止一次性读取整个目录所有文件
+- 禁止将归档全文长期保留在对话上下文中
+
+### 13.2 目录索引结构
+
+每个知识库子目录维护一个 `_index.json`，Agent 查询时入口统一：
+
+```
+/office/knowledge/
+├── archive/
+│   ├── _index.json                          ← 归档总索引
+│   └── agent-frontend-001-2025-04-02.md
+├── context/
+│   └── [projectId]/
+│       ├── _index.json                      ← 项目上下文索引
+│       └── [taskId]-summary.md
+├── skills/
+│   └── _index.json
+└── sops/
+    └── _index.json
+```
+
+### 13.3 归档总索引（`archive/_index.json`）
+
+```json
+{
+  "archives": [
+    {
+      "file": "agent-frontend-001-2025-04-02.md",
+      "agentId": "agent-frontend-001",
+      "agentName": "前端团队",
+      "projectId": "proj-001",
+      "projectName": "官网改版",
+      "archivedAt": "2025-04-02",
+      "reason": "force_shutdown",
+      "tasksDone": 1,
+      "tasksInterrupted": 1,
+      "keywords": ["前端", "React", "JWT", "登录", "Tailwind"]
+    }
+  ]
+}
+```
+
+### 13.4 项目上下文索引（`context/[projectId]/_index.json`）
+
+```json
+{
+  "projectId": "proj-001",
+  "summaries": [
+    {
+      "file": "task-001-summary.md",
+      "taskId": "task-001",
+      "title": "登录页面开发",
+      "agentId": "agent-frontend-001",
+      "completedAt": "2025-03-20",
+      "keywords": ["JWT", "useAuth", "httpOnly cookie"]
+    }
+  ]
+}
+```
+
+### 13.5 销毁归档文件格式（`archive/[agentId]-[date].md`）
+
+包含六个部分：
+1. 基本信息（agentId、角色、工作周期、归档原因）
+2. 任务完成情况（任务列表 + 状态表格）
+3. 未完成任务上下文（强制中断时必填：进度、已产出、待完成、建议接手方、关键上下文路径）
+4. 可复用知识产出（结论、方案、踩坑记录）
+5. 对接关系记录（曾调用/被调用的 Agent、待处理回执状态）
+
+### 13.6 任务增量摘要格式（`context/[projectId]/[taskId]-summary.md`）
+
+包含三个部分：
+1. 产出（完成了什么）
+2. 可复用结论（后续 Agent 可直接引用的内容）
+3. 踩坑（避免重复踩坑）
+
+精简原则：每条不超过 2 行，不写过程，只写结论。
+
+### 13.7 UI 归档室展示
+
+- 默认展示：摘要卡片（基本信息 + 任务统计）
+- 点击展开：完整 Markdown 渲染
+- 支持按 projectId / keywords / 时间范围筛选
+
+### 13.8 新 Agent 接手中断任务流程
+
+```
+CEO 在 UI 操作"分配中断任务给新 Agent"
+  → 系统读取归档中的 interruptedContext
+  → 自动构建 ceo_directive 消息
+  → 将中断上下文作为初始指令发送给新 Agent
+  → 新 Agent 收到后可直接续接任务
 ```
 
 ---
