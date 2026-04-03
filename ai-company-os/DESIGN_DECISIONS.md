@@ -343,7 +343,7 @@ Task 结束（Notification: task_complete）
 - [x] **Office Server 设计**：API 定义、文件监听、自动化逻辑（见第十二章）
 - [ ] **CEO 指令输入**：完整输入能力的技术实现（文字+文件+图片+URL）
 - [ ] **UI 详细设计**：平面图房间划分、Agent 动画、任务卡片交互
-- [ ] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本
+- [x] **CLAUDE.md 模板生成器**：创建 Agent 时的自动化脚本（见第十四章）
 - [x] **知识归档格式**：Agent 销毁时归档内容的标准结构（见第十三章）
 
 ---
@@ -469,7 +469,7 @@ CLAUDE.md 中的所有文件操作都通过这两个变量定位，不硬编码�
 |---------|---------|---------|
 | `state/[agentId].json` | 写入 | SSE 推送 UI 状态更新 |
 | `inbox/[agentId]/` | 新文件 | 记录消息创建时间，开始超时计时 |
-| `state/receipts/[msgId].json` | 写入 | 取消对应消息的���时计时，通知发送方 |
+| `state/receipts/[msgId].json` | 写入 | ���消对应消息的���时计时，通知发送方 |
 | `tasks/[projectId]/[taskId].json` | 写入 | 更新看板，SSE 推送 UI |
 | `knowledge/archive/` | 新文件 | 标记 Agent 可完成销毁，UI 移除工位 |
 
@@ -617,6 +617,69 @@ CEO 在 UI 操作"分配中断任务给新 Agent"
   → 自动构建 ceo_directive 消息
   → 将中断上下文作为初始指令发送给新 Agent
   → 新 Agent 收到后可直接续接任务
+```
+
+---
+
+---
+
+## 十四、CLAUDE.md 生成器（确认版）
+
+### 14.1 触发时机
+
+CEO 在 UI 创建 Agent 时，后端自动执行生成器，输出两个文件到 Agent 专属工作目录：
+- `CLAUDE.md`：静态通用规范 + 角色身份标识
+- `.claude/settings.json`：Hook 配置 + 环境变量注入
+
+### 14.2 生成器输入（UI 创建表单）
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `name` | 是 | Agent 名称 |
+| `type` | 是 | project / resident |
+| `role` | 是 | 角色描述 |
+| `projectId` | 条件必填 | type=project 时必填 |
+| `workBaseDir` | 是 | Agent 工作目录的父路径 |
+| `customInstructions` | 否 | 角色专属补充指令 |
+| `targetRepos` | 否 | 需要操作的代码仓库路径列表 |
+
+### 14.3 CLAUDE.md 输出结构
+
+精简原则：只写静态规范，动态信息（role、projectId 等）运行时从 agents.json 读取。
+
+包含六个部分：
+1. 身份声明（agentId + agents.json 路径，任务开始前必读）
+2. 任务开始前规范（读配置 → 读收件箱 → 读看板 → 按需查知识库）
+3. 任务执行中规范（HIGH 消息处理、状态推送由 Hook 自动完成）
+4. 任务完成后规范（更新 task 状态 → 写摘要 → 检查 nextAgent → 触发下游）
+5. 跨 Agent 消息规范（完整 context 快照 + timeoutAt + 回执轮询）
+6. shutdown 规范（归档 → 更新索引 → 回执，不得直接退出）
+
+知识库查询禁令（Token 节约原则）也写入此处，作为强制规范。
+
+### 14.4 .claude/settings.json 输出结构
+
+- PreToolUse / PostToolUse / Notification 三个 Hook 挂载点
+- 所有 Hook 指向 `{{OFFICE_ROOT}}/.hooks/` 下的共享脚本
+- 注入两个环境变量：OFFICE_AGENT_ID、OFFICE_ROOT
+
+### 14.5 Hook 脚本共享机制（确认）
+
+- 所有 Agent 共享同一套 Hook 脚本，存放于 `{{OFFICE_ROOT}}/.hooks/`
+- Hook 通过环境变量 OFFICE_AGENT_ID 区分 Agent 身份
+- 更新 Hook 脚本，所有 Agent 同步生效，无需逐个更新
+- 各 Agent 的 `.claude/settings.json` 只引用脚本路径，不内嵌逻辑
+
+### 14.6 生成后的后端动作
+
+```
+生成 CLAUDE.md 和 .claude/settings.json
+  → 创建 Agent 工作目录：{{workBaseDir}}/{{agentId}}/
+  → 写入 CLAUDE.md 和 .claude/settings.json
+  → 在 agents.json 中注册该 Agent
+  → 在 /office/inbox/{{agentId}}/ 创建空收件箱目录
+  → 在 /office/state/{{agentId}}.json 写入初始状态（idle）
+  → SSE 推送 UI：新增工位
 ```
 
 ---
