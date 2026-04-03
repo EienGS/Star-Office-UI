@@ -917,34 +917,98 @@ grep -q "{{" /tmp/verify-agents/${AGENT_ID}/.claude/settings.json && echo "FAIL:
 
 ### 任务描述
 
-实现像素风格办公室 UI，包含楼层切换、Phaser 场景、侧边面板、底部流水线。完全继承原项目风格。
+实现像素风格办公室 UI，包含楼层切换、Phaser 场景、侧边面板、底部流水线。必须直接复用原项目的渲染代码，不得自行重写。
 
 ### 前置确认
 
 - [ ] 阶段2 自检 Checklist 全部通过
-- [ ] 已阅读原项目 `frontend/index.html` 的完整代码（必须读取，不得依赖记忆）
+- [ ] **已完整阅读原项目 `Star-Office-UI/frontend/index.html` 全部代码**（必须实际读取文件，不得依赖记忆）
 - [ ] 已阅读 DESIGN_DECISIONS.md 第十六章（UI 详细设计）
+- [ ] 确认原项目 `Star-Office-UI/static/` 目录下的所有静态资源文件名（sprite、字体、tilemap等）
 
-### 风格继承规范
+---
 
-从原项目 `frontend/index.html` 中提取以下内容，**直接复制**到 `ai-company-os/frontend/css/base.css`：
-- 所有 CSS 自定义变量（`--`开头）
-- `@font-face` 声明
-- 基础 body/html 样式
-- `.pixel-border`、`.pixel-box` 等通用像素风格类
+### ⚠️ 强制代码复用清单（执行前必读）
 
-**禁止**重新设计或修改任何颜色值、字体设置。
+**以下代码块必须从原项目直接搬运，禁止重写、禁止简化：**
+
+**1. Phaser 游戏配置（必须搬运）**
+
+从原项目搬运以下配置到 `FloorScene.js`，一字不改：
+- `const config = { type: Phaser.AUTO, width: 1280, height: 720, pixelArt: true, scale: {...} }` 完整配置
+- `IS_TOUCH_DEVICE` 检测逻辑
+- `checkWebPSupport()` 和 `checkWebPSupportFallback()` 两个函数
+- `getExt()` 函数（WebP 兼容处理）
+
+**2. 静态资源路径（必须搬运）**
+
+原项目的所有 sprite/字体/tilemap 资源复制到 `ai-company-os/frontend/static/`，路径保持一致：
+- `static/fonts/ark-pixel-12px-proportional-zh_cn.ttf.woff2`
+- `static/` 下所有 `.png`、`.webp`、`.json`（tilemap）文件
+
+**命令：**
+```bash
+cp -r Star-Office-UI/static ai-company-os/frontend/static
+```
+
+**3. preload() 函数（必须搬运）**
+
+从原项目完整搬运 `preload()` 函数到 `FloorScene.js`，包括：
+- 所有 `this.load.image()`、`this.load.spritesheet()`、`this.load.tilemapTiledJSON()` 调用
+- 加载进度回调逻辑
+
+**4. 像素角色渲染逻辑（必须搬运）**
+
+从原项目搬运以下到 `FloorScene.js`：
+- `star`（主角色）的 sprite 创建代码，含 anims.create 动画定义
+- `guestSprites` 的创建逻辑（访客像素角色）
+- 气泡（bubble）的创建和 typewriter 打字机动画
+- 角色行走 `waypoints` 逻辑和 tween 动画
+
+**5. CSS（必须搬运）**
+
+从原项目 `<style>` 块中直接提取以下内容到 `ai-company-os/frontend/css/base.css`：
+- `@font-face` 声明（ArkPixel 字体）
+- `body` 基础样式（`background: #1a1a2e`，`font-family: 'ArkPixel'`）
+- `#game-container` 样式（含 `image-rendering: pixelated`、`border: 4px solid #e94560`）
+- `#loading-overlay`、`#loading-progress-bar` 样式（含 `background: linear-gradient(90deg, #e94560, #ffd700)`）
+- 所有面板样式（`background: #2c2f3a`、`border: 2px solid #e94560`）
+- 滚动条样式（`#guest-agent-list::-webkit-scrollbar` 等）
+
+**6. 气泡文字内容（必须搬运）**
+
+将原项目的 `BUBBLE_TEXTS` 对象完整搬运到新系统，新增 Agent 状态对应的文字。
+
+**7. 加载动画（必须搬运）**
+
+完整搬运 `#loading-overlay` HTML 结构和 `updateLoadingProgress()`、`hideLoadingOverlay()` 函数。
+
+---
+
+### 重要提示
+
+- 原项目用的是 Phaser.js 渲染 Canvas，**不是 CSS 矩形**。房间必须渲染在 Canvas 上，通过 Phaser 的图形 API 绘制，而不是 HTML div。
+- Agent 角色必须使用原项目现有的 sprite 图片（`guest_role_1` 到 `guest_role_6` 等），不得用 CSS 色块替代。
+- Tilemap 背景必须加载原项目的 `.json` tilemap 文件，渲染像素地图纹理，不得用纯色背景替代。
+- 如果原项目 `static/` 目录中没有某个资源，执行 `ls Star-Office-UI/static/` 确认实际有哪些文件，按实际文件名加载。
+
+---
 
 ### 实现要求
 
-**base.css**（从原项目提取）
+**base.css**（从原项目提取，禁止自行编写）
 
-直接复制原项目的全部 CSS 变量，包括但不限于：
-- `--bg-primary: #1a1a2e`
-- `--bg-panel: #2c2f3a`
-- `--accent: #e94560`
-- `--gold: #ffd700`
-- `--bg-secondary: #3a3f4f`
+执行步骤：
+1. 读取 `Star-Office-UI/frontend/index.html` 的 `<style>` 块
+2. 将其中全部 CSS 完整复制到 `ai-company-os/frontend/css/base.css`
+3. 不得删除任何样式，不得修改任何颜色值
+
+核心颜色值（仅供验证用，实际以原文件为准）：
+- 背景：`#1a1a2e`
+- 面板背景：`#2c2f3a`
+- 强调色/边框：`#e94560`
+- 标题色：`#ffd700`
+- 次要背景：`#3a3f4f`
 - 字体：ArkPixel
 
 **layout.css**
@@ -969,7 +1033,7 @@ DOM 结构：
 
 **FloorScene.js（Phaser 场景基类）**
 
-继承原项目的 Phaser 配置，扩展：
+继承原项目的 Phaser 配置，扩展��
 - `addAgent(agentData)` 方法：在指定 area 渲染像素角色
 - `removeAgent(agentId)` 方法：移除工位和角色
 - `updateAgentState(agentId, state)` 方法：更新角色状态和气泡
@@ -1068,7 +1132,7 @@ eventSource.onerror = () => {
 
 **V4-3**：SSE 实时更新
 ```
-在另一个终端执行：
+在��一个终端执行：
   curl -X POST http://localhost:18792/api/v1/state/{某agentId} \
     -H "Content-Type: application/json" \
     -d '{"status": "working", "detail": "实时测试"}'
@@ -1081,10 +1145,27 @@ eventSource.onerror = () => {
 预期：显示已注册的所有 Agent，点击某个 Agent 跳转到对应楼层并高亮工位
 ```
 
-**V4-5**：CSS 风格一致性
+**V4-5**：像素渲染一致性逐项检查（最重要的验证）
 ```
-对比原项目 frontend/index.html 的视觉效果
-预期：背景色、字体、边框风格、颜色系统与原项目视觉一致
+打开浏览器，同时打开原项目（Star-Office-UI）和新系统，逐项对比：
+
+1. 背景：新系统背景色必须是 #1a1a2e（深蓝黑），不得是其他颜色
+2. 字体：所有文字必须是 ArkPixel 像素字体，不得是普通系统字体
+3. Canvas 渲染：主区域必须是 Phaser Canvas，不得是 HTML div 矩形
+4. Tilemap：F1/B1 场景必须显示像素地图纹理背景，不得是纯色背景
+5. Agent 角色：工位区必须显示像素 sprite 角色，不得是色块或方块
+6. 气泡：Agent 状态气泡必须使用打字机动画，文字逐字出现
+7. 边框：所有面板边框必须是 2-4px solid #e94560，不得是其他颜色
+8. 加载动画：页面加载时必须显示进度条（#e94560→#ffd700渐变）
+
+上述8项必须全部通过，任意一项不通过即视为验证失败，必须修复后重新验证。
+```
+
+**V4-6**：静态资源加载检查
+```
+打开浏览器开发者工具 Network 面板，刷新页面
+预期：无 404 错误，所有 .png/.webp/.woff2/.json 资源加载成功
+如有 404：检查 ai-company-os/frontend/static/ 目录，确认文件已从原项目复制
 ```
 
 ### 自检 Checklist
@@ -1093,9 +1174,12 @@ eventSource.onerror = () => {
 - [ ] V4-2 楼层切换验证通过
 - [ ] V4-3 SSE 实时更新验证通过
 - [ ] V4-4 Agent 列表面板验证通过
-- [ ] V4-5 CSS 风格一致性验证通过
-- [ ] 所有颜色值来自 CSS 变量，无硬编码颜色
-- [ ] 未引用原项目文件路径（必须是独立复制）
+- [ ] V4-5 像素渲染一致性8项全部通过
+- [ ] V4-6 无静态资源 404 错误
+- [ ] Canvas 区域使用 Phaser 渲染，而非 HTML div 矩形
+- [ ] Agent 角色使用 sprite 图片，而非 CSS 色块
+- [ ] static/ 目录已从原项目完整复制
+- [ ] 未引用原项目文件路径（独立复制，非软链接）
 
 ---
 
