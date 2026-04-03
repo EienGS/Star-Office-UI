@@ -6,25 +6,27 @@
   <title>AI Office OS — UI 方案对比</title>
   <style>
     :root {
-      --bg-base: #0a0c10;
-      --bg-surface: #111318;
-      --bg-elevated: #181c24;
-      --bg-panel: #1e2330;
-      --border: #2a3040;
-      --border-bright: #3a4560;
-      --text-primary: #e8eaf0;
-      --text-secondary: #8892a4;
-      --text-muted: #4a5568;
-      --accent-cyan: #00c8ff;
-      --accent-cyan-dim: rgba(0, 200, 255, 0.15);
-      --accent-green: #00e5a0;
-      --accent-green-dim: rgba(0, 229, 160, 0.12);
-      --accent-amber: #ffb547;
-      --accent-amber-dim: rgba(255, 181, 71, 0.12);
-      --accent-red: #ff4f6a;
-      --accent-red-dim: rgba(255, 79, 106, 0.12);
-      --accent-blue: #4d7cfe;
-      --accent-blue-dim: rgba(77, 124, 254, 0.12);
+      --bg-base:          #090b0f;
+      --bg-surface:       #0f1218;
+      --bg-elevated:      #161b24;
+      --bg-panel:         #1c2230;
+      --border:           #242c3a;
+      --border-bright:    #313d52;
+      --text-primary:     #e2e6ef;
+      --text-secondary:   #7d8fa8;
+      --text-muted:       #404f63;
+      --accent-cyan:      #00c8ff;
+      --accent-cyan-dim:  rgba(0,200,255,0.12);
+      --accent-green:     #00e5a0;
+      --accent-green-dim: rgba(0,229,160,0.1);
+      --accent-amber:     #ffb547;
+      --accent-amber-dim: rgba(255,181,71,0.1);
+      --accent-red:       #ff4f6a;
+      --accent-red-dim:   rgba(255,79,106,0.1);
+      --accent-blue:      #4d7cfe;
+      --accent-blue-dim:  rgba(77,124,254,0.1);
+      --accent-purple:    #a78bfa;
+      --accent-purple-dim:rgba(167,139,250,0.1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,680 +34,405 @@
     body {
       background: var(--bg-base);
       color: var(--text-primary);
-      font-family: 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      font-family: 'SF Pro Display','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
       min-height: 100vh;
+      overflow: hidden;
     }
 
     /* ===== 顶部导航 ===== */
     .topbar {
-      height: 52px;
+      height: 48px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      padding: 0 20px;
+      position: sticky; top: 0; z-index: 100;
+      gap: 16px;
     }
     .topbar-logo {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.14em; color: var(--accent-cyan);
+      text-transform: uppercase; white-space: nowrap;
     }
-    .tab-group {
-      display: flex;
-      gap: 4px;
-    }
+    .tab-group { display: flex; gap: 3px; }
     .tab-btn {
-      padding: 6px 16px;
-      border-radius: 6px;
+      padding: 5px 14px; border-radius: 6px;
       border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
+      background: transparent; color: var(--text-secondary);
+      font-size: 12px; cursor: pointer; transition: all 0.18s;
+      white-space: nowrap;
     }
     .tab-btn.active {
       background: var(--accent-cyan-dim);
       border-color: var(--accent-cyan);
       color: var(--accent-cyan);
     }
-    .tab-btn:hover:not(.active) {
-      background: var(--bg-elevated);
-      color: var(--text-primary);
+    .tab-btn:hover:not(.active) { background: var(--bg-elevated); color: var(--text-primary); }
+
+    /* 场景切换 */
+    .scene-group { display: flex; gap: 3px; align-items: center; }
+    .scene-label { font-size: 11px; color: var(--text-muted); margin-right: 4px; }
+    .scene-btn {
+      padding: 4px 10px; border-radius: 5px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text-secondary);
+      font-size: 11px; cursor: pointer; transition: all 0.15s;
     }
-    .topbar-hint {
-      font-size: 12px;
-      color: var(--text-muted);
+    .scene-btn.active {
+      background: var(--accent-amber-dim);
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
     }
+    .scene-btn:hover:not(.active) { color: var(--text-primary); background: var(--bg-elevated); }
 
     /* ===== 方案容器 ===== */
-    .scheme-container {
-      display: none;
-      height: calc(100vh - 52px);
-      overflow: hidden;
-    }
-    .scheme-container.active { display: flex; }
+    .scheme { display: none; height: calc(100vh - 48px); overflow: hidden; }
+    .scheme.active { display: flex; }
 
     /* ============================================================
-       方案 A：RPG 俯视地图
+       通用子组件
     ============================================================ */
-    #scheme-a {
-      flex-direction: column;
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 7px; border-radius: 10px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
     }
-    .scheme-a-inner {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
+    .badge-green  { background: var(--accent-green-dim);  color: var(--accent-green); }
+    .badge-amber  { background: var(--accent-amber-dim);  color: var(--accent-amber); }
+    .badge-red    { background: var(--accent-red-dim);    color: var(--accent-red); }
+    .badge-cyan   { background: var(--accent-cyan-dim);   color: var(--accent-cyan); }
+    .badge-blue   { background: var(--accent-blue-dim);   color: var(--accent-blue); }
+    .badge-purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+
+    .panel-title {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 8px;
     }
-    /* 左侧：地图区 */
-    .map-area {
-      flex: 1;
-      position: relative;
-      background: #0d1117;
-      overflow: hidden;
+
+    .scroll-area { overflow-y: auto; }
+    .scroll-area::-webkit-scrollbar { width: 3px; }
+    .scroll-area::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+    /* 地图通用 */
+    .map-bg {
+      position: relative; background: #080b10; overflow: hidden;
     }
-    /* 地图背景网格 */
-    .map-area::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+    .map-bg::before {
+      content: ''; position: absolute; inset: 0;
       background-image:
-        linear-gradient(rgba(42,48,64,0.4) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(42,48,64,0.4) 1px, transparent 1px);
-      background-size: 40px 40px;
+        linear-gradient(rgba(36,44,58,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36,44,58,0.5) 1px, transparent 1px);
+      background-size: 28px 28px;
     }
 
     /* 房间 */
     .room {
       position: absolute;
       border: 1px solid var(--border-bright);
-      border-radius: 8px;
-      background: var(--bg-elevated);
-      display: flex;
-      flex-direction: column;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      cursor: pointer;
+      background: rgba(22,27,36,0.95);
+      display: flex; flex-direction: column;
+      border-radius: 2px;
     }
-    .room:hover {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 16px rgba(0,200,255,0.15);
-    }
-    .room-header {
-      padding: 6px 10px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+    .room-hdr {
+      padding: 5px 8px; font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      background: var(--bg-panel);
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .room-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .room-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
     .room-body {
-      flex: 1;
-      padding: 8px 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-content: flex-start;
+      flex: 1; padding: 6px; display: flex;
+      flex-wrap: wrap; gap: 5px; align-content: flex-start;
     }
 
     /* 工位 */
     .desk {
-      width: 56px; height: 44px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      position: relative;
+      width: 52px; height: 40px;
+      background: var(--bg-base); border: 1px solid var(--border);
+      border-radius: 3px; cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px;
+      position: relative; transition: all 0.15s;
     }
-    .desk.active {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 8px rgba(0,229,160,0.2);
-    }
-    .desk.busy {
-      border-color: var(--accent-amber);
-      box-shadow: 0 0 8px rgba(255,181,71,0.2);
-    }
-    .desk.error {
-      border-color: var(--accent-red);
-      box-shadow: 0 0 8px rgba(255,79,106,0.2);
-    }
-    .agent-avatar {
-      width: 20px; height: 20px;
-      border-radius: 50%;
+    .desk:hover { border-color: var(--accent-cyan); }
+    .desk.s-work  { border-color: var(--accent-green);  background: rgba(0,229,160,0.04); }
+    .desk.s-think { border-color: var(--accent-amber);  background: rgba(255,181,71,0.04); }
+    .desk.s-block { border-color: var(--accent-red);    background: rgba(255,79,106,0.04); }
+    .desk.s-idle  { border-color: var(--border); opacity: 0.6; }
+    .d-avatar {
+      width: 18px; height: 18px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 8px; font-weight: 700;
     }
-    .desk-label {
-      font-size: 9px;
-      color: var(--text-secondary);
-      text-align: center;
-      line-height: 1.2;
-      max-width: 50px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .d-name {
+      font-size: 8px; color: var(--text-secondary);
+      max-width: 48px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; text-align: center;
     }
-    .desk-status-dot {
-      position: absolute;
-      top: 3px; right: 3px;
-      width: 5px; height: 5px;
-      border-radius: 50%;
+    .d-dot {
+      position: absolute; top: 3px; right: 3px;
+      width: 4px; height: 4px; border-radius: 50%;
     }
 
-    /* 公共设施房间 */
-    .facility-room {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+    /* 公共设施块 */
+    .facility {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; padding: 4px;
     }
-    .facility-icon {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .facility-name {
-      font-size: 10px;
-      color: var(--text-secondary);
-      text-align: center;
-    }
+    .fac-icon { font-size: 18px; line-height: 1; }
+    .fac-label { font-size: 9px; color: var(--text-secondary); text-align: center; line-height: 1.4; }
 
-    /* 通道连线 */
-    .map-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-    }
+    /* 走廊 */
+    .corridor { position: absolute; background: rgba(36,44,58,0.3); }
 
-    /* 走动的 Agent 图标 */
-    .moving-agent {
-      position: absolute;
-      width: 20px; height: 20px;
-      border-radius: 50%;
+    /* Agent 移动 */
+    .mover {
+      position: absolute; width: 14px; height: 14px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 9px;
-      font-weight: 700;
-      border: 2px solid rgba(255,255,255,0.3);
-      animation: agent-move-a 6s linear infinite;
-      z-index: 10;
-    }
-    @keyframes agent-move-a {
-      0%   { left: 220px; top: 180px; }
-      30%  { left: 380px; top: 180px; }
-      60%  { left: 380px; top: 300px; }
-      100% { left: 220px; top: 180px; }
+      font-size: 7px; font-weight: 700; z-index: 20;
+      box-shadow: 0 0 8px currentColor;
     }
 
     /* 消息气泡 */
-    .msg-bubble {
-      position: absolute;
-      background: var(--bg-panel);
-      border: 1px solid var(--border-bright);
-      border-radius: 8px;
-      padding: 5px 9px;
-      font-size: 10px;
-      color: var(--text-secondary);
-      max-width: 140px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      animation: bubble-fade 3s ease-in-out infinite;
+    .bubble {
+      position: absolute; z-index: 15;
+      background: var(--bg-panel); border: 1px solid var(--border-bright);
+      border-radius: 6px; padding: 4px 8px;
+      font-size: 9px; color: var(--text-secondary);
+      white-space: nowrap; pointer-events: none;
+      animation: blink 3s ease-in-out infinite;
     }
-    @keyframes bubble-fade {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
+    @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
 
-    /* 右侧面板 A */
-    .side-panel-a {
-      width: 280px;
-      background: var(--bg-surface);
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .panel-section {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .panel-title {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-    }
-
-    /* ===== 底部状态栏 ===== */
-    .status-bar {
-      height: 36px;
-      background: var(--bg-surface);
+    /* 状态栏 */
+    .statusbar {
+      height: 30px; background: var(--bg-surface);
       border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 0 20px;
-      font-size: 11px;
-      color: var(--text-muted);
+      display: flex; align-items: center; gap: 14px; padding: 0 16px;
+      font-size: 11px; color: var(--text-muted); flex-shrink: 0;
     }
-    .status-item {
-      display: flex; align-items: center; gap: 5px;
+    .sb-item { display: flex; align-items: center; gap: 4px; }
+    .sb-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* SVG 流动线 */
+    .flow-svg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 5;
     }
-    .status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
+    @keyframes dash-flow {
+      0%   { stroke-dashoffset: 80; opacity: 0; }
+      15%  { opacity: 0.7; }
+      85%  { opacity: 0.7; }
+      100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    .fline { stroke-dasharray: 8 4; animation: dash-flow 3s linear infinite; }
+    .fline2 { animation-delay: 1.5s; }
+    .fline3 { animation-delay: 0.8s; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    /* ============================================================
+       方案 A — RPG 地图
+    ============================================================ */
+    #scheme-a { flex-direction: row; }
+    .a-map { flex: 1; }
+    .a-side {
+      width: 268px; background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .a-side-sec {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+    }
+    .a-side-sec.grow { flex: 1; overflow-y: auto; border-bottom: none; }
+
+    .msg-row {
+      display: flex; gap: 7px; align-items: flex-start;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 11px; cursor: pointer;
+    }
+    .msg-row:last-child { border-bottom: none; }
+    .msg-row:hover { background: var(--bg-elevated); margin: 0 -14px; padding: 8px 14px; }
+    .m-av {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; margin-top: 1px;
+    }
+    .m-body { flex: 1; }
+    .m-from { color: var(--text-secondary); font-weight: 600; font-size: 10px; }
+    .m-text { color: var(--text-muted); font-size: 10px; margin-top: 2px; line-height: 1.4; }
+    .m-time { font-size: 9px; color: var(--text-muted); white-space: nowrap; }
+
+    .task-row {
+      display: flex; gap: 7px; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+    }
+    .task-row:last-child { border-bottom: none; }
+    .t-ic {
+      width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+    }
+    .t-body { flex: 1; }
+    .t-title { color: var(--text-primary); font-weight: 500; font-size: 11px; }
+    .t-sub { color: var(--text-muted); font-size: 9px; margin-top: 1px; }
+
+    /* ============================================================
+       方案 B — 平面图 + 侧边
+    ============================================================ */
+    #scheme-b { flex-direction: row; }
+    .b-nav {
+      width: 46px; background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; padding: 10px 0; gap: 3px;
+    }
+    .nav-ic {
+      width: 32px; height: 32px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer; transition: all 0.15s;
+      color: var(--text-muted); border: 1px solid transparent;
+    }
+    .nav-ic.active {
+      background: var(--accent-cyan-dim);
+      border-color: var(--accent-cyan); color: var(--accent-cyan);
+    }
+    .nav-ic:hover:not(.active) { background: var(--bg-elevated); color: var(--text-primary); }
+    .b-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .b-map { flex: 1; }
+    .b-side {
+      width: 290px; background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .b-side-hdr {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .b-side-title { font-size: 12px; font-weight: 600; }
+    .b-side-body { flex: 1; overflow-y: auto; }
+    .sec-label {
+      padding: 8px 14px 4px;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+
+    /* 指令输入框 */
+    .cmd-box {
+      margin: 8px 12px;
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px;
+    }
+    .cmd-label { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; }
+    .cmd-targets { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 7px; }
+    .cmd-input {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 5px; padding: 5px 8px;
+      font-size: 10px; color: var(--text-muted);
     }
 
     /* ============================================================
-       方案 B：像素平面图 + 侧边面板
+       方案 C — 混合（地图 + 底部通用流水线）
     ============================================================ */
-    #scheme-b {
-      flex-direction: row;
-    }
-
-    /* 左侧全局导航 */
-    .nav-sidebar {
-      width: 52px;
-      background: var(--bg-surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px 0;
-      gap: 4px;
-    }
-    .nav-icon {
-      width: 36px; height: 36px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      color: var(--text-muted);
-      border: 1px solid transparent;
-    }
-    .nav-icon.active {
-      background: var(--accent-cyan-dim);
-      border-color: var(--accent-cyan);
-      color: var(--accent-cyan);
-    }
-    .nav-icon:hover:not(.active) {
-      background: var(--bg-elevated);
-      color: var(--text-primary);
-    }
-
-    /* 中间主区域 */
-    .main-canvas {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* 像素地图 */
-    .pixel-map {
-      flex: 1;
-      position: relative;
-      background: #0d1117;
-      overflow: hidden;
-    }
-    .pixel-map::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(42,48,64,0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(42,48,64,0.3) 1px, transparent 1px);
-      background-size: 24px 24px;
-    }
-
-    /* 像素风房间 */
-    .px-room {
-      position: absolute;
-      border: 2px solid var(--border-bright);
-      background: rgba(24,28,36,0.9);
-      display: flex;
-      flex-direction: column;
-    }
-    .px-room-title {
-      padding: 4px 8px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 5px;
-    }
-    .px-room-body {
-      flex: 1;
-      padding: 6px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      align-content: flex-start;
-    }
-
-    /* 像素工位 */
-    .px-desk {
-      width: 48px; height: 38px;
-      background: var(--bg-base);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .px-desk:hover { border-color: var(--accent-cyan); }
-    .px-desk.working { border-color: var(--accent-green); background: rgba(0,229,160,0.05); }
-    .px-desk.thinking { border-color: var(--accent-amber); background: rgba(255,181,71,0.05); }
-    .px-desk.blocked { border-color: var(--accent-red); background: rgba(255,79,106,0.05); }
-
-    .px-avatar {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 700;
-    }
-    .px-name {
-      font-size: 8px;
-      color: var(--text-secondary);
-      max-width: 44px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-align: center;
-    }
-
-    /* 像素公共设施 */
-    .px-facility {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 4px;
-      cursor: pointer;
-    }
-    .px-facility-icon {
-      font-size: 20px;
-      filter: grayscale(0.3);
-    }
-    .px-facility-label {
-      font-size: 9px;
-      color: var(--text-secondary);
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    /* 走廊 */
-    .px-corridor {
-      position: absolute;
-      background: rgba(42,48,64,0.25);
-    }
-
-    /* 消息流动线 */
-    .flow-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* 行走中的 Agent */
-    .px-moving {
-      position: absolute;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 8px; font-weight: 700;
-      z-index: 20;
-      box-shadow: 0 0 6px currentColor;
-    }
-    .px-moving.m1 { animation: move-b1 8s ease-in-out infinite; color: var(--accent-green); background: rgba(0,229,160,0.2); border: 1px solid var(--accent-green); }
-    .px-moving.m2 { animation: move-b2 10s ease-in-out infinite; color: var(--accent-cyan); background: rgba(0,200,255,0.2); border: 1px solid var(--accent-cyan); }
-
-    @keyframes move-b1 {
-      0%   { left: 170px; top: 110px; }
-      40%  { left: 320px; top: 110px; }
-      70%  { left: 320px; top: 230px; }
-      100% { left: 170px; top: 110px; }
-    }
-    @keyframes move-b2 {
-      0%   { left: 450px; top: 240px; }
-      35%  { left: 450px; top: 110px; }
-      65%  { left: 580px; top: 110px; }
-      100% { left: 450px; top: 240px; }
-    }
-
-    /* 右侧详情面板 B */
-    .detail-panel {
-      width: 300px;
-      background: var(--bg-surface);
+    #scheme-c { flex-direction: column; }
+    .c-top { flex: 1; display: flex; overflow: hidden; }
+    .c-map { flex: 1; }
+    .c-side {
+      width: 260px; background: var(--bg-surface);
       border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: flex; flex-direction: column; overflow: hidden;
     }
-    .detail-panel-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
+    .c-side-hdr {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600;
+    }
+    .c-side-body { flex: 1; overflow-y: auto; }
+
+    /* 底部通用流水线 */
+    .c-bottom {
+      height: 188px; background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+    }
+    .c-bottom-hdr {
+      height: 32px; padding: 0 16px;
       display: flex; align-items: center; justify-content: space-between;
-    }
-    .detail-panel-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .detail-panel-body {
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    /* ===== 通用组件 ===== */
-    .badge {
-      display: inline-flex; align-items: center;
-      padding: 2px 7px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-    .badge-green { background: var(--accent-green-dim); color: var(--accent-green); }
-    .badge-amber { background: var(--accent-amber-dim); color: var(--accent-amber); }
-    .badge-red { background: var(--accent-red-dim); color: var(--accent-red); }
-    .badge-cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
-    .badge-blue { background: var(--accent-blue-dim); color: var(--accent-blue); }
-
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 9px 12px;
       border-bottom: 1px solid var(--border);
-      font-size: 12px;
     }
-    .task-item:hover { background: var(--bg-elevated); }
-    .task-icon {
-      width: 24px; height: 24px;
-      border-radius: 6px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
+    .c-bottom-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+    .pipeline-tabs { display: flex; gap: 2px; }
+    .pt-btn {
+      padding: 3px 10px; border-radius: 4px;
+      border: 1px solid transparent; background: transparent;
+      color: var(--text-muted); font-size: 10px; cursor: pointer; transition: all 0.15s;
     }
-    .task-meta { flex: 1; }
-    .task-title { color: var(--text-primary); font-weight: 500; line-height: 1.4; }
-    .task-sub { color: var(--text-muted); font-size: 10px; margin-top: 2px; }
+    .pt-btn.active {
+      background: var(--accent-amber-dim); border-color: var(--accent-amber); color: var(--accent-amber);
+    }
+    .pt-btn:hover:not(.active) { color: var(--text-primary); }
 
-    .msg-item {
-      display: flex;
-      gap: 8px;
-      padding: 9px 12px;
-      border-bottom: 1px solid var(--border);
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .msg-item:hover { background: var(--bg-elevated); }
-    .msg-dot-avatar {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 9px; font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .msg-content { flex: 1; }
-    .msg-from { color: var(--text-secondary); font-weight: 600; }
-    .msg-text { color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
-    .msg-time { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+    .pipeline-body { flex: 1; overflow: hidden; position: relative; }
 
-    .scroll-area { overflow-y: auto; flex: 1; }
-    .scroll-area::-webkit-scrollbar { width: 4px; }
-    .scroll-area::-webkit-scrollbar-track { background: transparent; }
-    .scroll-area::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
-
-    /* 方案 C：混合 */
-    #scheme-c {
-      flex-direction: column;
+    /* 流水线通道 */
+    .pipeline {
+      display: none; height: 100%; padding: 10px 16px;
+      gap: 0; align-items: flex-start; overflow-x: auto;
     }
-    .scheme-c-top {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
+    .pipeline.active { display: flex; }
+    .pl-stage {
+      display: flex; flex-direction: column; gap: 5px;
+      min-width: 130px; flex-shrink: 0;
     }
-    .scheme-c-bottom {
-      height: 200px;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      overflow: hidden;
+    .pl-stage-hdr {
+      display: flex; align-items: center; gap: 5px; padding: 0 4px;
     }
-    .flow-panel {
-      flex: 1;
-      border-right: 1px solid var(--border);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
+    .pl-stage-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .pl-stage-name { font-size: 10px; font-weight: 600; color: var(--text-secondary); }
+    .pl-stage-count { font-size: 9px; color: var(--text-muted); margin-left: auto; }
+    .pl-cards { display: flex; flex-direction: column; gap: 4px; min-height: 30px; }
+    .pl-card {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 5px; padding: 5px 7px;
+      font-size: 10px; cursor: pointer; transition: all 0.15s;
     }
-    .flow-panel-header {
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
+    .pl-card:hover { border-color: var(--border-bright); background: var(--bg-panel); }
+    .pl-card.hot { border-color: var(--accent-amber); background: var(--accent-amber-dim); }
+    .pl-card.done { border-color: var(--accent-green); background: var(--accent-green-dim); }
+    .pl-card-title { color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+    .pl-card-meta { color: var(--text-muted); font-size: 9px; margin-top: 2px; }
+    .pl-card-assignee {
+      display: inline-block; margin-top: 3px;
+      font-size: 9px; color: var(--text-secondary);
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 5px;
     }
-    .flow-track {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 0;
-      padding: 12px 16px;
-      overflow-x: auto;
-    }
-    .flow-stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      min-width: 90px;
-    }
-    .flow-stage-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-align: center;
-    }
-    .flow-card {
-      width: 80px;
-      padding: 6px 8px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 10px;
-      color: var(--text-secondary);
-      text-align: center;
-      line-height: 1.4;
-    }
-    .flow-card.active-card {
-      border-color: var(--accent-amber);
-      color: var(--accent-amber);
-      background: var(--accent-amber-dim);
-    }
-    .flow-arrow {
-      width: 28px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--border-bright);
-      font-size: 14px;
-      margin-top: -22px;
-    }
-    .broadcast-panel {
-      width: 280px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    .pl-arrow {
+      width: 22px; display: flex; align-items: center; justify-content: center;
+      color: var(--border-bright); font-size: 12px;
+      margin-top: 20px; flex-shrink: 0;
     }
 
-    /* 描述区 */
-    .scheme-desc {
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      padding: 10px 20px;
-      display: flex;
-      gap: 32px;
-      align-items: center;
+    /* 空阶段 */
+    .pl-empty {
+      color: var(--text-muted); font-size: 9px;
+      border: 1px dashed var(--border); border-radius: 5px;
+      padding: 6px 8px; text-align: center;
     }
-    .desc-item { display: flex; align-items: center; gap: 8px; }
-    .desc-icon { font-size: 14px; }
-    .desc-text { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
-    .desc-bold { color: var(--text-primary); font-weight: 500; }
 
-    /* 脉冲动画 */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .pulse { animation: pulse 2s ease-in-out infinite; }
+    /* Agent 走动动画们 */
+    @keyframes mv-a1 { 0%{left:190px;top:100px} 40%{left:330px;top:100px} 70%{left:330px;top:210px} 100%{left:190px;top:100px} }
+    @keyframes mv-a2 { 0%{left:430px;top:210px} 35%{left:430px;top:100px} 70%{left:550px;top:100px} 100%{left:430px;top:210px} }
+    @keyframes mv-b1 { 0%{left:160px;top:90px} 45%{left:295px;top:90px} 75%{left:295px;top:200px} 100%{left:160px;top:90px} }
+    @keyframes mv-b2 { 0%{left:380px;top:195px} 40%{left:380px;top:90px} 72%{left:500px;top:90px} 100%{left:380px;top:195px} }
+    @keyframes mv-c1 { 0%{left:160px;top:85px} 40%{left:288px;top:85px} 68%{left:288px;top:190px} 100%{left:160px;top:85px} }
 
-    /* 消息飞行动画 */
-    @keyframes fly-msg {
-      0%   { stroke-dashoffset: 200; opacity: 0; }
-      20%  { opacity: 1; }
-      80%  { opacity: 1; }
-      100% { stroke-dashoffset: 0; opacity: 0; }
-    }
-    .fly-path {
-      stroke-dasharray: 200;
-      animation: fly-msg 4s linear infinite;
-    }
-    .fly-path2 { animation-delay: 2s; }
+    .mover.cyan  { color:var(--accent-cyan);  background:rgba(0,200,255,0.15); border:1px solid var(--accent-cyan); }
+    .mover.green { color:var(--accent-green); background:rgba(0,229,160,0.15); border:1px solid var(--accent-green); }
   </style>
 </head>
 <body>
@@ -714,421 +441,191 @@
 <div class="topbar">
   <div class="topbar-logo">AI Office OS</div>
   <div class="tab-group">
-    <button class="tab-btn active" onclick="switchScheme('a')">方案 A — RPG 地图视角</button>
-    <button class="tab-btn" onclick="switchScheme('b')">方案 B — 平面图 + 侧边面板</button>
-    <button class="tab-btn" onclick="switchScheme('c')">方案 C — 混合视角</button>
+    <button class="tab-btn active" onclick="switchScheme('a')">方案 A — RPG 地图</button>
+    <button class="tab-btn"        onclick="switchScheme('b')">方案 B — 平面图 + 侧边</button>
+    <button class="tab-btn"        onclick="switchScheme('c')">方案 C — 混合视角</button>
   </div>
-  <div class="topbar-hint">点击切换方案预览</div>
-</div>
-
-<!-- ============================================================
-     方案 A：RPG 俯视地图
-============================================================ -->
-<div id="scheme-a" class="scheme-container active">
-  <div class="scheme-a-inner">
-
-    <!-- 地图主区域 -->
-    <div class="map-area">
-      <!-- 消息连线 -->
-      <svg class="map-svg">
-        <defs>
-          <marker id="arrow-a" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L6,3 z" fill="#3a4560"/>
-          </marker>
-        </defs>
-        <!-- 走廊连线 -->
-        <line x1="260" y1="120" x2="380" y2="120" stroke="#2a3040" stroke-width="16" opacity="0.5"/>
-        <line x1="380" y1="120" x2="380" y2="280" stroke="#2a3040" stroke-width="16" opacity="0.5"/>
-        <line x1="260" y1="280" x2="380" y2="280" stroke="#2a3040" stroke-width="16" opacity="0.5"/>
-        <line x1="380" y1="280" x2="560" y2="280" stroke="#2a3040" stroke-width="16" opacity="0.5"/>
-        <!-- 消息流动 -->
-        <path d="M 270 150 Q 340 150 370 200 Q 395 230 370 270" stroke="#00c8ff" stroke-width="1.5" fill="none" stroke-dasharray="6 4" class="fly-path" marker-end="url(#arrow-a)"/>
-        <path d="M 390 160 Q 500 160 560 200" stroke="#00e5a0" stroke-width="1.5" fill="none" stroke-dasharray="6 4" class="fly-path fly-path2" marker-end="url(#arrow-a)"/>
-      </svg>
-
-      <!-- 开发团队区 -->
-      <div class="room" style="left:40px;top:60px;width:230px;height:160px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--accent-green)"></div>
-          <span style="color:var(--accent-green)">开发团队</span>
-          <span class="badge badge-green" style="margin-left:auto">4 在线</span>
-        </div>
-        <div class="room-body">
-          <div class="desk active">
-            <div class="desk-status-dot" style="background:var(--accent-green)"></div>
-            <div class="agent-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A1</div>
-            <div class="desk-label">Frontend</div>
-          </div>
-          <div class="desk active">
-            <div class="desk-status-dot" style="background:var(--accent-green)"></div>
-            <div class="agent-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A2</div>
-            <div class="desk-label">Backend</div>
-          </div>
-          <div class="desk busy">
-            <div class="desk-status-dot" style="background:var(--accent-amber)"></div>
-            <div class="agent-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">A3</div>
-            <div class="desk-label">DB设计</div>
-          </div>
-          <div class="desk">
-            <div class="desk-status-dot" style="background:var(--text-muted)"></div>
-            <div class="agent-avatar" style="background:var(--bg-panel);color:var(--text-muted)">A4</div>
-            <div class="desk-label">待命</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 测试团队区 -->
-      <div class="room" style="left:40px;top:250px;width:230px;height:130px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--accent-cyan)"></div>
-          <span style="color:var(--accent-cyan)">测试团队</span>
-          <span class="badge badge-cyan" style="margin-left:auto">2 在线</span>
-        </div>
-        <div class="room-body">
-          <div class="desk busy">
-            <div class="desk-status-dot" style="background:var(--accent-amber)"></div>
-            <div class="agent-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">T1</div>
-            <div class="desk-label">API测试</div>
-          </div>
-          <div class="desk active">
-            <div class="desk-status-dot" style="background:var(--accent-green)"></div>
-            <div class="agent-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">T2</div>
-            <div class="desk-label">E2E</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DevOps -->
-      <div class="room" style="left:400px;top:60px;width:160px;height:130px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--accent-blue)"></div>
-          <span style="color:var(--accent-blue)">DevOps</span>
-          <span class="badge badge-blue" style="margin-left:auto">1</span>
-        </div>
-        <div class="room-body">
-          <div class="desk busy">
-            <div class="desk-status-dot" style="background:var(--accent-amber)"></div>
-            <div class="agent-avatar" style="background:rgba(77,124,254,0.2);color:var(--accent-blue)">D1</div>
-            <div class="desk-label">部署中</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 会议室 -->
-      <div class="room" style="left:400px;top:220px;width:140px;height:100px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--accent-amber)"></div>
-          <span style="color:var(--accent-amber)">会议室</span>
-        </div>
-        <div class="room-body" style="justify-content:center;align-items:center;flex:1">
-          <div style="text-align:center">
-            <div style="font-size:20px">📋</div>
-            <div style="font-size:9px;color:var(--accent-amber);margin-top:4px">待交接任务 × 2</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 服务器室 -->
-      <div class="room" style="left:560px;top:60px;width:110px;height:90px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--text-muted)"></div>
-          <span>服务器室</span>
-        </div>
-        <div class="room-body facility-room">
-          <div class="facility-icon" style="background:rgba(77,124,254,0.1)">🖥️</div>
-          <div class="facility-name">MCP / 云资源</div>
-        </div>
-      </div>
-
-      <!-- 档案室 -->
-      <div class="room" style="left:560px;top:175px;width:110px;height:90px;">
-        <div class="room-header">
-          <div class="room-dot" style="background:var(--text-muted)"></div>
-          <span>档案室</span>
-        </div>
-        <div class="room-body facility-room">
-          <div class="facility-icon" style="background:rgba(0,229,160,0.1)">🗄️</div>
-          <div class="facility-name">知识库 / SKILL</div>
-        </div>
-      </div>
-
-      <!-- 走动的 Agent -->
-      <div class="moving-agent" style="background:rgba(0,200,255,0.2);color:var(--accent-cyan);border-color:var(--accent-cyan)">A2</div>
-
-      <!-- 消息气泡 -->
-      <div class="msg-bubble" style="left:290px;top:210px">登录功能开发完成，请测试</div>
-    </div>
-
-    <!-- 右侧面板 -->
-    <div class="side-panel-a">
-      <div class="panel-section">
-        <div class="panel-title">消息队列</div>
-        <div class="msg-item">
-          <div class="msg-dot-avatar" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
-          <div class="msg-content">
-            <div class="msg-from">Frontend → Test</div>
-            <div class="msg-text">登录功能完成，分支 feat/login，请覆盖以下场景...</div>
-          </div>
-          <div class="msg-time">刚刚</div>
-        </div>
-        <div class="msg-item">
-          <div class="msg-dot-avatar" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">D1</div>
-          <div class="msg-content">
-            <div class="msg-from">DevOps → 广播</div>
-            <div class="msg-text">staging 环境部署成功，v0.3.2 已上线</div>
-          </div>
-          <div class="msg-time">2分钟前</div>
-        </div>
-      </div>
-      <div class="panel-section" style="flex:1;border-bottom:none">
-        <div class="panel-title">任务流水线</div>
-        <div class="task-item">
-          <div class="task-icon" style="background:var(--accent-green-dim);color:var(--accent-green)">⚡</div>
-          <div class="task-meta">
-            <div class="task-title">用户登录功能</div>
-            <div class="task-sub">A1 → T1 · 待测试</div>
-          </div>
-          <span class="badge badge-amber">review</span>
-        </div>
-        <div class="task-item">
-          <div class="task-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue)">🚀</div>
-          <div class="task-meta">
-            <div class="task-title">v0.3.2 部署</div>
-            <div class="task-sub">D1 · 执行中</div>
-          </div>
-          <span class="badge badge-green">done</span>
-        </div>
-        <div class="task-item">
-          <div class="task-icon" style="background:var(--accent-cyan-dim);color:var(--accent-cyan)">📦</div>
-          <div class="task-meta">
-            <div class="task-title">数据库 Schema 设计</div>
-            <div class="task-sub">A3 · 进行中</div>
-          </div>
-          <span class="badge badge-cyan">wip</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="scheme-desc">
-    <div class="desc-item"><span class="desc-icon">🗺️</span><div class="desc-text"><span class="desc-bold">全局地图感强</span>，房间位置一眼看清空间关系</div></div>
-    <div class="desc-item"><span class="desc-icon">🚶</span><div class="desc-text"><span class="desc-bold">Agent 走动可见</span>，传递任务有仪式感</div></div>
-    <div class="desc-item"><span class="desc-icon">⚠️</span><div class="desc-text"><span class="desc-bold">信息密度较低</span>，大量 Agent 时可能拥挤</div></div>
+  <!-- 场景切换：展示不同任务类型 -->
+  <div class="scene-group">
+    <span class="scene-label">场景示例</span>
+    <button class="scene-btn active" onclick="switchScene('dev')">软件开发</button>
+    <button class="scene-btn"        onclick="switchScene('content')">内容创作</button>
+    <button class="scene-btn"        onclick="switchScene('research')">市场调研</button>
+    <button class="scene-btn"        onclick="switchScene('ops')">运营策划</button>
   </div>
 </div>
 
 
 <!-- ============================================================
-     方案 B：像素平面图 + 侧边面板
+     方案 A — RPG 地图
 ============================================================ -->
-<div id="scheme-b" class="scheme-container">
+<div id="scheme-a" class="scheme active">
 
-  <!-- 左侧导航 -->
-  <div class="nav-sidebar">
-    <div class="nav-icon active" title="办公室">🏢</div>
-    <div class="nav-icon" title="任务">📋</div>
-    <div class="nav-icon" title="消息">💬</div>
-    <div class="nav-icon" title="知识库">📚</div>
-    <div style="flex:1"></div>
-    <div class="nav-icon" title="设置">⚙️</div>
-  </div>
-
-  <!-- 中间像素地图 -->
-  <div class="main-canvas">
-    <div class="pixel-map">
-      <!-- 消息流动 -->
-      <svg class="flow-svg">
-        <defs>
-          <marker id="arrow-b" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
-            <path d="M0,0 L0,5 L5,2.5 z" fill="#00c8ff" opacity="0.6"/>
-          </marker>
-        </defs>
-        <path d="M 200 130 Q 260 130 300 130" stroke="#00c8ff" stroke-width="1" fill="none" opacity="0.5" class="fly-path" marker-end="url(#arrow-b)"/>
-        <path d="M 350 170 Q 400 200 430 220" stroke="#00e5a0" stroke-width="1" fill="none" opacity="0.5" class="fly-path fly-path2" marker-end="url(#arrow-b)"/>
-      </svg>
-
+  <!-- 地图区 -->
+  <div class="a-map map-bg">
+    <svg class="flow-svg">
+      <defs>
+        <marker id="arr-a" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+          <path d="M0,0 L0,5 L5,2.5 z" fill="#00c8ff" opacity="0.7"/>
+        </marker>
+        <marker id="arr-ag" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+          <path d="M0,0 L0,5 L5,2.5 z" fill="#00e5a0" opacity="0.7"/>
+        </marker>
+      </defs>
       <!-- 走廊 -->
-      <div class="px-corridor" style="left:0;top:160px;width:100%;height:20px"></div>
-      <div class="px-corridor" style="left:290px;top:0;width:20px;height:100%"></div>
+      <rect x="0" y="155" width="700" height="18" fill="rgba(36,44,58,0.25)"/>
+      <rect x="295" y="0" width="18" height="420" fill="rgba(36,44,58,0.25)"/>
+      <!-- 消息线 -->
+      <path d="M 255 130 Q 280 154 290 154" stroke="#00c8ff" stroke-width="1.2" fill="none" class="fline" marker-end="url(#arr-a)"/>
+      <path d="M 315 140 Q 370 140 410 140" stroke="#00e5a0" stroke-width="1.2" fill="none" class="fline fline2" marker-end="url(#arr-ag)"/>
+    </svg>
 
-      <!-- 开发工位区 -->
-      <div class="px-room" style="left:20px;top:20px;width:260px;height:135px;">
-        <div class="px-room-title">
-          <div class="room-dot" style="background:var(--accent-green)"></div>
-          <span style="color:var(--accent-green)">DEV ZONE</span>
-          <span class="badge badge-green" style="margin-left:auto;font-size:9px">4 Active</span>
+    <!-- 主 Agent 工位区（左上） -->
+    <div class="room" style="left:20px;top:20px;width:268px;height:128px;">
+      <div class="room-hdr">
+        <div class="room-dot" style="background:var(--accent-green)"></div>
+        <span style="color:var(--accent-green)" class="a-team-name">开发团队</span>
+        <span class="badge badge-green" style="margin-left:auto" id="a-team-badge">3 在线</span>
+      </div>
+      <div class="room-body" id="a-team-desks">
+        <div class="desk s-work">
+          <div class="d-dot" style="background:var(--accent-green)"></div>
+          <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">A1</div>
+          <div class="d-name" id="a-d1">前端实现</div>
         </div>
-        <div class="px-room-body">
-          <div class="px-desk working">
-            <div class="px-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A1</div>
-            <div class="px-name">Frontend</div>
-          </div>
-          <div class="px-desk working">
-            <div class="px-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A2</div>
-            <div class="px-name">Backend</div>
-          </div>
-          <div class="px-desk thinking">
-            <div class="px-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">A3</div>
-            <div class="px-name">DB设计</div>
-          </div>
-          <div class="px-desk">
-            <div class="px-avatar" style="background:var(--bg-panel);color:var(--text-muted)">A4</div>
-            <div class="px-name">待命</div>
-          </div>
+        <div class="desk s-think">
+          <div class="d-dot" style="background:var(--accent-amber)"></div>
+          <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">A2</div>
+          <div class="d-name" id="a-d2">接口设计</div>
+        </div>
+        <div class="desk s-idle">
+          <div class="d-dot" style="background:var(--text-muted)"></div>
+          <div class="d-avatar" style="background:var(--bg-panel);color:var(--text-muted)">A3</div>
+          <div class="d-name">待命</div>
         </div>
       </div>
-
-      <!-- 测试区 -->
-      <div class="px-room" style="left:20px;top:185px;width:260px;height:120px;">
-        <div class="px-room-title">
-          <div class="room-dot" style="background:var(--accent-cyan)"></div>
-          <span style="color:var(--accent-cyan)">QA ZONE</span>
-          <span class="badge badge-cyan" style="margin-left:auto;font-size:9px">2 Active</span>
-        </div>
-        <div class="px-room-body">
-          <div class="px-desk thinking">
-            <div class="px-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">T1</div>
-            <div class="px-name">API Test</div>
-          </div>
-          <div class="px-desk working">
-            <div class="px-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">T2</div>
-            <div class="px-name">E2E</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DevOps -->
-      <div class="px-room" style="left:320px;top:20px;width:150px;height:130px;">
-        <div class="px-room-title">
-          <div class="room-dot" style="background:var(--accent-blue)"></div>
-          <span style="color:var(--accent-blue)">DEVOPS</span>
-        </div>
-        <div class="px-room-body">
-          <div class="px-desk thinking">
-            <div class="px-avatar" style="background:rgba(77,124,254,0.2);color:var(--accent-blue)">D1</div>
-            <div class="px-name">部署中</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 会议室 -->
-      <div class="px-room" style="left:320px;top:185px;width:150px;height:120px;">
-        <div class="px-room-title">
-          <div class="room-dot" style="background:var(--accent-amber)"></div>
-          <span style="color:var(--accent-amber)">会议室</span>
-        </div>
-        <div class="px-room-body px-facility" style="justify-content:center;align-items:center">
-          <div class="px-facility-icon">📋</div>
-          <div class="px-facility-label">待交接 × 2</div>
-        </div>
-      </div>
-
-      <!-- 服务器室 -->
-      <div class="px-room" style="left:490px;top:20px;width:110px;height:90px;">
-        <div class="px-room-title"><span>服务器室</span></div>
-        <div class="px-room-body px-facility" style="justify-content:center;align-items:center">
-          <div class="px-facility-icon">🖥️</div>
-          <div class="px-facility-label">MCP · 云资源</div>
-        </div>
-      </div>
-
-      <!-- 档案室 -->
-      <div class="px-room" style="left:490px;top:130px;width:110px;height:90px;">
-        <div class="px-room-title"><span>档案室</span></div>
-        <div class="px-room-body px-facility" style="justify-content:center;align-items:center">
-          <div class="px-facility-icon">🗄️</div>
-          <div class="px-facility-label">知识库 · SKILL</div>
-        </div>
-      </div>
-
-      <!-- 走动 Agent -->
-      <div class="px-moving m1">A2</div>
-      <div class="px-moving m2">T1</div>
     </div>
 
-    <!-- 底部状态栏 -->
-    <div class="status-bar">
-      <div class="status-item">
-        <div class="status-dot pulse" style="background:var(--accent-green)"></div>
-        <span>7 Agent 在线</span>
+    <!-- 下游 Agent 区（左下） -->
+    <div class="room" style="left:20px;top:175px;width:268px;height:115px;">
+      <div class="room-hdr">
+        <div class="room-dot" style="background:var(--accent-cyan)"></div>
+        <span style="color:var(--accent-cyan)" id="a-team2-name">测试团队</span>
+        <span class="badge badge-cyan" style="margin-left:auto">2 在线</span>
       </div>
-      <div class="status-item">
-        <div class="status-dot" style="background:var(--accent-amber)"></div>
-        <span>3 任务进行中</span>
+      <div class="room-body">
+        <div class="desk s-think">
+          <div class="d-dot" style="background:var(--accent-amber)"></div>
+          <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">B1</div>
+          <div class="d-name" id="a-d3">API 测试</div>
+        </div>
+        <div class="desk s-work">
+          <div class="d-dot" style="background:var(--accent-green)"></div>
+          <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">B2</div>
+          <div class="d-name" id="a-d4">E2E 测试</div>
+        </div>
       </div>
-      <div class="status-item">
-        <div class="status-dot" style="background:var(--accent-cyan)"></div>
-        <span>2 待交接</span>
-      </div>
-      <div style="margin-left:auto;color:var(--text-muted)">最后同步 2s 前</div>
     </div>
+
+    <!-- 执行 Agent（右上） -->
+    <div class="room" style="left:320px;top:20px;width:155px;height:128px;">
+      <div class="room-hdr">
+        <div class="room-dot" style="background:var(--accent-blue)"></div>
+        <span style="color:var(--accent-blue)" id="a-team3-name">执行团队</span>
+      </div>
+      <div class="room-body">
+        <div class="desk s-think">
+          <div class="d-dot" style="background:var(--accent-amber)"></div>
+          <div class="d-avatar" style="background:rgba(77,124,254,0.18);color:var(--accent-blue)">C1</div>
+          <div class="d-name" id="a-d5">部署中</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 会议室（右下） -->
+    <div class="room" style="left:320px;top:175px;width:155px;height:115px;">
+      <div class="room-hdr">
+        <div class="room-dot" style="background:var(--accent-amber)"></div>
+        <span style="color:var(--accent-amber)">会议室</span>
+      </div>
+      <div class="facility">
+        <div class="fac-icon">📋</div>
+        <div class="fac-label" id="a-meeting-txt">待交接任务 × 2</div>
+      </div>
+    </div>
+
+    <!-- 服务器室 -->
+    <div class="room" style="left:490px;top:20px;width:120px;height:88px;">
+      <div class="room-hdr"><span>服务器室</span></div>
+      <div class="facility">
+        <div class="fac-icon">🖥️</div>
+        <div class="fac-label">MCP · 云资源</div>
+      </div>
+    </div>
+
+    <!-- 档案室 -->
+    <div class="room" style="left:490px;top:125px;width:120px;height:88px;">
+      <div class="room-hdr"><span>档案室</span></div>
+      <div class="facility">
+        <div class="fac-icon">🗄️</div>
+        <div class="fac-label">知识库 · SKILL</div>
+      </div>
+    </div>
+
+    <!-- 移动 Agent -->
+    <div class="mover cyan" style="animation: mv-a1 8s ease-in-out infinite;">A2</div>
+    <div class="mover green" style="animation: mv-a2 11s ease-in-out infinite; animation-delay:2s">B1</div>
+
+    <!-- 消息气泡 -->
+    <div class="bubble" style="left:295px;top:180px" id="a-bubble">前端完成，请测试</div>
   </div>
 
-  <!-- 右侧详情面板 -->
-  <div class="detail-panel">
-    <div class="detail-panel-header">
-      <span class="detail-panel-title">消息 & 任务</span>
-      <span class="badge badge-red">2 新消息</span>
+  <!-- 右侧面板 -->
+  <div class="a-side">
+    <div class="a-side-sec">
+      <div class="panel-title">最新消息</div>
+      <div class="msg-row">
+        <div class="m-av" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
+        <div class="m-body">
+          <div class="m-from" id="a-msg1-from">前端 → 测试团队</div>
+          <div class="m-text" id="a-msg1-text">登录功能完成，分支 feat/login，请覆盖以下测试场景...</div>
+        </div>
+        <div class="m-time">刚刚</div>
+      </div>
+      <div class="msg-row">
+        <div class="m-av" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">C1</div>
+        <div class="m-body">
+          <div class="m-from" id="a-msg2-from">执行团队 → 全体</div>
+          <div class="m-text" id="a-msg2-text">staging v0.3.2 部署成功，已上线</div>
+        </div>
+        <div class="m-time">2分钟前</div>
+      </div>
     </div>
-    <div class="detail-panel-body scroll-area">
-      <!-- 消息列表 -->
-      <div style="padding:8px 12px 4px;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">最新消息</div>
-      <div class="msg-item" style="background:rgba(0,200,255,0.04)">
-        <div class="msg-dot-avatar" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
-        <div class="msg-content">
-          <div class="msg-from">Frontend → QA</div>
-          <div class="msg-text">登录功能完成，分支 feat/login，请测试以下场景</div>
-        </div>
-        <div class="msg-time">刚刚</div>
-      </div>
-      <div class="msg-item">
-        <div class="msg-dot-avatar" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">D1</div>
-        <div class="msg-content">
-          <div class="msg-from">DevOps → 全体</div>
-          <div class="msg-text">staging v0.3.2 部署完成</div>
-        </div>
-        <div class="msg-time">2m</div>
-      </div>
-
-      <!-- 任务流水线 -->
-      <div style="padding:8px 12px 4px;margin-top:4px;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">任务流水线</div>
-      <div class="task-item">
-        <div class="task-icon" style="background:var(--accent-amber-dim);color:var(--accent-amber)">⏳</div>
-        <div class="task-meta">
-          <div class="task-title">用户登录功能</div>
-          <div class="task-sub">Frontend → QA · 待审核</div>
+    <div class="a-side-sec grow scroll-area">
+      <div class="panel-title">当前任务</div>
+      <div class="task-row">
+        <div class="t-ic" style="background:var(--accent-amber-dim);color:var(--accent-amber)">⏳</div>
+        <div class="t-body">
+          <div class="t-title" id="a-t1">用户登录功能</div>
+          <div class="t-sub" id="a-t1-sub">A1 → B1 · 待测试</div>
         </div>
         <span class="badge badge-amber">review</span>
       </div>
-      <div class="task-item">
-        <div class="task-icon" style="background:var(--accent-green-dim);color:var(--accent-green)">✓</div>
-        <div class="task-meta">
-          <div class="task-title">v0.3.2 部署</div>
-          <div class="task-sub">DevOps · 完成</div>
+      <div class="task-row">
+        <div class="t-ic" style="background:var(--accent-green-dim);color:var(--accent-green)">✓</div>
+        <div class="t-body">
+          <div class="t-title" id="a-t2">v0.3.2 部署</div>
+          <div class="t-sub" id="a-t2-sub">C1 · 完成</div>
         </div>
         <span class="badge badge-green">done</span>
       </div>
-      <div class="task-item">
-        <div class="task-icon" style="background:var(--accent-cyan-dim);color:var(--accent-cyan)">◉</div>
-        <div class="task-meta">
-          <div class="task-title">DB Schema 设计</div>
-          <div class="task-sub">Dev A3 · 进行中</div>
+      <div class="task-row">
+        <div class="t-ic" style="background:var(--accent-cyan-dim);color:var(--accent-cyan)">◉</div>
+        <div class="t-body">
+          <div class="t-title" id="a-t3">DB Schema 设计</div>
+          <div class="t-sub" id="a-t3-sub">A2 · 进行中</div>
         </div>
         <span class="badge badge-cyan">wip</span>
-      </div>
-
-      <!-- CEO 指令区 -->
-      <div style="padding:8px 12px 4px;margin-top:4px;font-size:10px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase">向 Agent 发指令</div>
-      <div style="padding:8px 12px">
-        <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">收件人</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-            <span class="badge badge-green" style="cursor:pointer">Frontend</span>
-            <span class="badge badge-cyan" style="cursor:pointer">QA</span>
-            <span class="badge badge-blue" style="cursor:pointer">DevOps</span>
-          </div>
-          <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:11px;color:var(--text-muted)">输入指令...</div>
-        </div>
       </div>
     </div>
   </div>
@@ -1136,154 +633,628 @@
 
 
 <!-- ============================================================
-     方案 C：混合视角（平面图 + 底部任务流看板）
+     方案 B — 平面图 + 侧边面板
 ============================================================ -->
-<div id="scheme-c" class="scheme-container">
-  <div class="scheme-c-top">
+<div id="scheme-b" class="scheme">
 
-    <!-- 复用像素地图（简化版） -->
-    <div class="main-canvas" style="flex:1">
-      <div class="pixel-map">
-        <svg class="flow-svg">
-          <defs>
-            <marker id="arrow-c" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
-              <path d="M0,0 L0,5 L5,2.5 z" fill="#00c8ff" opacity="0.5"/>
-            </marker>
-          </defs>
-          <path d="M 200 120 Q 280 120 320 120" stroke="#00c8ff" stroke-width="1" fill="none" opacity="0.4" class="fly-path"/>
-        </svg>
+  <!-- 左侧导航栏 -->
+  <div class="b-nav">
+    <div class="nav-ic active">🏢</div>
+    <div class="nav-ic">📋</div>
+    <div class="nav-ic">💬</div>
+    <div class="nav-ic">📚</div>
+    <div style="flex:1"></div>
+    <div class="nav-ic">⚙️</div>
+  </div>
 
-        <div class="px-corridor" style="left:0;top:155px;width:100%;height:18px"></div>
-        <div class="px-corridor" style="left:280px;top:0;width:18px;height:100%"></div>
+  <!-- 主画布 -->
+  <div class="b-main">
+    <div class="b-map map-bg">
+      <svg class="flow-svg">
+        <defs>
+          <marker id="arr-b" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+            <path d="M0,0 L0,5 L5,2.5 z" fill="#00c8ff" opacity="0.6"/>
+          </marker>
+        </defs>
+        <rect x="0" y="148" width="660" height="16" fill="rgba(36,44,58,0.25)"/>
+        <rect x="272" y="0" width="16" height="420" fill="rgba(36,44,58,0.25)"/>
+        <path d="M 188 118 Q 245 118 268 118" stroke="#00c8ff" stroke-width="1" fill="none" opacity="0.5" class="fline" marker-end="url(#arr-b)"/>
+        <path d="M 295 140 Q 360 140 390 165" stroke="#00e5a0" stroke-width="1" fill="none" opacity="0.5" class="fline fline2" marker-end="url(#arr-b)"/>
+      </svg>
 
-        <div class="px-room" style="left:18px;top:18px;width:250px;height:130px;">
-          <div class="px-room-title"><div class="room-dot" style="background:var(--accent-green)"></div><span style="color:var(--accent-green)">DEV ZONE</span></div>
-          <div class="px-room-body">
-            <div class="px-desk working"><div class="px-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A1</div><div class="px-name">Frontend</div></div>
-            <div class="px-desk working"><div class="px-avatar" style="background:rgba(0,229,160,0.2);color:var(--accent-green)">A2</div><div class="px-name">Backend</div></div>
-            <div class="px-desk thinking"><div class="px-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">A3</div><div class="px-name">DB设计</div></div>
+      <div class="room" style="left:18px;top:18px;width:248px;height:125px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-green)"></div>
+          <span style="color:var(--accent-green)" id="b-team1">DEV ZONE</span>
+          <span class="badge badge-green" style="margin-left:auto;font-size:9px">3 Active</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-work">
+            <div class="d-dot" style="background:var(--accent-green)"></div>
+            <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">A1</div>
+            <div class="d-name" id="b-d1">前端实现</div>
+          </div>
+          <div class="desk s-think">
+            <div class="d-dot" style="background:var(--accent-amber)"></div>
+            <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">A2</div>
+            <div class="d-name" id="b-d2">接口设计</div>
+          </div>
+          <div class="desk s-idle">
+            <div class="d-dot" style="background:var(--text-muted)"></div>
+            <div class="d-avatar" style="background:var(--bg-panel);color:var(--text-muted)">A3</div>
+            <div class="d-name">待命</div>
           </div>
         </div>
-        <div class="px-room" style="left:18px;top:180px;width:250px;height:110px;">
-          <div class="px-room-title"><div class="room-dot" style="background:var(--accent-cyan)"></div><span style="color:var(--accent-cyan)">QA ZONE</span></div>
-          <div class="px-room-body">
-            <div class="px-desk thinking"><div class="px-avatar" style="background:rgba(255,181,71,0.2);color:var(--accent-amber)">T1</div><div class="px-name">测试中</div></div>
+      </div>
+
+      <div class="room" style="left:18px;top:168px;width:248px;height:110px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-cyan)"></div>
+          <span style="color:var(--accent-cyan)" id="b-team2">QA ZONE</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-think">
+            <div class="d-dot" style="background:var(--accent-amber)"></div>
+            <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">B1</div>
+            <div class="d-name" id="b-d3">API 测试</div>
+          </div>
+          <div class="desk s-work">
+            <div class="d-dot" style="background:var(--accent-green)"></div>
+            <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">B2</div>
+            <div class="d-name" id="b-d4">E2E</div>
           </div>
         </div>
-        <div class="px-room" style="left:308px;top:18px;width:140px;height:130px;">
-          <div class="px-room-title"><div class="room-dot" style="background:var(--accent-blue)"></div><span style="color:var(--accent-blue)">DEVOPS</span></div>
-          <div class="px-room-body"><div class="px-desk thinking"><div class="px-avatar" style="background:rgba(77,124,254,0.2);color:var(--accent-blue)">D1</div><div class="px-name">部署中</div></div></div>
-        </div>
-        <div class="px-room" style="left:308px;top:180px;width:140px;height:110px;">
-          <div class="px-room-title"><div class="room-dot" style="background:var(--accent-amber)"></div><span style="color:var(--accent-amber)">会议室</span></div>
-          <div class="px-room-body px-facility" style="justify-content:center;align-items:center"><div class="px-facility-icon">📋</div><div class="px-facility-label">待交接 × 2</div></div>
-        </div>
-        <div class="px-room" style="left:464px;top:18px;width:100px;height:85px;">
-          <div class="px-room-title"><span>服务器室</span></div>
-          <div class="px-room-body px-facility" style="justify-content:center;align-items:center"><div class="px-facility-icon" style="font-size:16px">🖥️</div><div class="px-facility-label">MCP</div></div>
-        </div>
-        <div class="px-room" style="left:464px;top:120px;width:100px;height:85px;">
-          <div class="px-room-title"><span>档案室</span></div>
-          <div class="px-room-body px-facility" style="justify-content:center;align-items:center"><div class="px-facility-icon" style="font-size:16px">🗄️</div><div class="px-facility-label">知识库</div></div>
-        </div>
-
-        <div class="px-moving m1">A2</div>
       </div>
 
-      <div class="status-bar">
-        <div class="status-item"><div class="status-dot pulse" style="background:var(--accent-green)"></div><span>7 在线</span></div>
-        <div class="status-item"><div class="status-dot" style="background:var(--accent-amber)"></div><span>3 进行中</span></div>
-        <div style="margin-left:auto;color:var(--text-muted)">2s 前同步</div>
+      <div class="room" style="left:298px;top:18px;width:150px;height:125px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-blue)"></div>
+          <span style="color:var(--accent-blue)" id="b-team3">DEVOPS</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-think">
+            <div class="d-dot" style="background:var(--accent-amber)"></div>
+            <div class="d-avatar" style="background:rgba(77,124,254,0.18);color:var(--accent-blue)">C1</div>
+            <div class="d-name" id="b-d5">部署中</div>
+          </div>
+        </div>
       </div>
+
+      <div class="room" style="left:298px;top:168px;width:150px;height:110px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-amber)"></div>
+          <span style="color:var(--accent-amber)">会议室</span>
+        </div>
+        <div class="facility">
+          <div class="fac-icon">📋</div>
+          <div class="fac-label" id="b-meeting">待交接 × 2</div>
+        </div>
+      </div>
+
+      <div class="room" style="left:462px;top:18px;width:108px;height:80px;">
+        <div class="room-hdr"><span>服务器室</span></div>
+        <div class="facility"><div class="fac-icon">🖥️</div><div class="fac-label">MCP · 云资源</div></div>
+      </div>
+      <div class="room" style="left:462px;top:115px;width:108px;height:80px;">
+        <div class="room-hdr"><span>档案室</span></div>
+        <div class="facility"><div class="fac-icon">🗄️</div><div class="fac-label">知识库 · SKILL</div></div>
+      </div>
+
+      <div class="mover cyan" style="animation: mv-b1 9s ease-in-out infinite;">A1</div>
+      <div class="mover green" style="animation: mv-b2 12s ease-in-out infinite; animation-delay:3s">B1</div>
     </div>
 
-    <!-- 右侧消息面板 -->
-    <div class="detail-panel" style="width:260px">
-      <div class="detail-panel-header"><span class="detail-panel-title">消息</span><span class="badge badge-red">2 新</span></div>
-      <div class="detail-panel-body scroll-area">
-        <div class="msg-item" style="background:rgba(0,200,255,0.04)">
-          <div class="msg-dot-avatar" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
-          <div class="msg-content"><div class="msg-from">Frontend → QA</div><div class="msg-text">登录功能完成，请开始测试</div></div>
-          <div class="msg-time">刚刚</div>
-        </div>
-        <div class="msg-item">
-          <div class="msg-dot-avatar" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">D1</div>
-          <div class="msg-content"><div class="msg-from">DevOps → 全体</div><div class="msg-text">v0.3.2 部署完成</div></div>
-          <div class="msg-time">2m</div>
-        </div>
-        <div style="padding:8px 12px;margin-top:4px">
-          <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:8px 10px">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">向 Agent 发指令</div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
-              <span class="badge badge-green" style="cursor:pointer;font-size:9px">A1</span>
-              <span class="badge badge-cyan" style="cursor:pointer;font-size:9px">T1</span>
-              <span class="badge badge-blue" style="cursor:pointer;font-size:9px">D1</span>
-            </div>
-            <div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text-muted)">输入指令...</div>
-          </div>
-        </div>
-      </div>
+    <div class="statusbar">
+      <div class="sb-item"><div class="sb-dot pulse" style="background:var(--accent-green)"></div><span id="b-stat1">6 Agent 在线</span></div>
+      <div class="sb-item"><div class="sb-dot" style="background:var(--accent-amber)"></div><span id="b-stat2">3 任务进行中</span></div>
+      <div class="sb-item"><div class="sb-dot" style="background:var(--accent-cyan)"></div><span id="b-stat3">2 待交接</span></div>
+      <div style="margin-left:auto;color:var(--text-muted)">2s 前同步</div>
     </div>
   </div>
 
-  <!-- 底部任务流看板（方案C的独特特性） -->
-  <div class="scheme-c-bottom">
-    <div class="flow-panel">
-      <div class="flow-panel-header">任务流水线（跨团队流转可视化）</div>
-      <div class="flow-track">
-        <div class="flow-stage">
-          <div class="flow-stage-label">待认领</div>
-          <div class="flow-card">权限系统设计</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-stage">
-          <div class="flow-stage-label">开发中</div>
-          <div class="flow-card active-card">登录功能<br/>A1 · A2</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-stage">
-          <div class="flow-stage-label">待测试</div>
-          <div class="flow-card active-card">登录接口<br/>等待 T1</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-stage">
-          <div class="flow-stage-label">待部署</div>
-          <div class="flow-card">v0.3.3<br/>打包中</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-stage">
-          <div class="flow-stage-label">已完成</div>
-          <div class="flow-card">v0.3.2 ✓<br/>D1 · 完成</div>
-        </div>
-      </div>
+  <!-- 右侧面板 -->
+  <div class="b-side">
+    <div class="b-side-hdr">
+      <span class="b-side-title">消息 & 任务</span>
+      <span class="badge badge-red">2 新消息</span>
     </div>
+    <div class="b-side-body scroll-area">
+      <div class="sec-label">最新消息</div>
+      <div class="msg-row" style="padding:8px 14px">
+        <div class="m-av" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
+        <div class="m-body">
+          <div class="m-from" id="b-msg1-from">前端 → QA</div>
+          <div class="m-text" id="b-msg1-text">登录功能完成，分支 feat/login，请测试以下场景</div>
+        </div>
+        <div class="m-time">刚刚</div>
+      </div>
+      <div class="msg-row" style="padding:8px 14px">
+        <div class="m-av" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">C1</div>
+        <div class="m-body">
+          <div class="m-from" id="b-msg2-from">DevOps → 全体</div>
+          <div class="m-text" id="b-msg2-text">staging v0.3.2 部署完成</div>
+        </div>
+        <div class="m-time">2m</div>
+      </div>
 
-    <div class="broadcast-panel">
-      <div class="flow-panel-header" style="padding:10px 14px;border-bottom:1px solid var(--border)">广播日志</div>
-      <div class="scroll-area" style="padding:6px 0">
-        <div class="msg-item" style="padding:7px 14px">
-          <div class="msg-dot-avatar" style="background:rgba(77,124,254,0.15);color:var(--accent-blue);width:18px;height:18px;font-size:8px">D1</div>
-          <div class="msg-content"><div class="msg-text" style="font-size:10px">staging v0.3.2 部署完成</div><div class="msg-time" style="font-size:9px;color:var(--text-muted)">2分钟前</div></div>
+      <div class="sec-label" style="margin-top:4px">当前任务</div>
+      <div class="msg-row" style="padding:8px 14px">
+        <div class="t-ic" style="background:var(--accent-amber-dim);color:var(--accent-amber);width:22px;height:22px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px">⏳</div>
+        <div class="t-body">
+          <div class="t-title" id="b-t1">用户登录功能</div>
+          <div class="t-sub" id="b-t1-sub">A1 → B1 · 待测试</div>
         </div>
-        <div class="msg-item" style="padding:7px 14px">
-          <div class="msg-dot-avatar" style="background:rgba(0,229,160,0.15);color:var(--accent-green);width:18px;height:18px;font-size:8px">A1</div>
-          <div class="msg-content"><div class="msg-text" style="font-size:10px">feat/login 分支合并完成</div><div class="msg-time" style="font-size:9px;color:var(--text-muted)">5分钟前</div></div>
+        <span class="badge badge-amber">review</span>
+      </div>
+      <div class="msg-row" style="padding:8px 14px">
+        <div class="t-ic" style="background:var(--accent-green-dim);color:var(--accent-green);width:22px;height:22px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px">✓</div>
+        <div class="t-body">
+          <div class="t-title" id="b-t2">v0.3.2 部署</div>
+          <div class="t-sub" id="b-t2-sub">C1 · 完成</div>
         </div>
+        <span class="badge badge-green">done</span>
+      </div>
+
+      <div class="sec-label" style="margin-top:4px">向 Agent 发指令</div>
+      <div class="cmd-box">
+        <div class="cmd-label">收件人</div>
+        <div class="cmd-targets" id="b-targets">
+          <span class="badge badge-green" style="cursor:pointer">A1</span>
+          <span class="badge badge-cyan" style="cursor:pointer">B1</span>
+          <span class="badge badge-blue" style="cursor:pointer">C1</span>
+          <span class="badge" style="cursor:pointer;background:var(--bg-panel);color:var(--text-muted)">全体</span>
+        </div>
+        <div class="cmd-input">输入指令...</div>
       </div>
     </div>
   </div>
 </div>
 
+
+<!-- ============================================================
+     方案 C — 混合视角
+============================================================ -->
+<div id="scheme-c" class="scheme">
+  <div class="c-top">
+
+    <!-- 地图 -->
+    <div class="c-map map-bg">
+      <svg class="flow-svg">
+        <defs>
+          <marker id="arr-c" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+            <path d="M0,0 L0,5 L5,2.5 z" fill="#00c8ff" opacity="0.6"/>
+          </marker>
+        </defs>
+        <rect x="0" y="148" width="640" height="16" fill="rgba(36,44,58,0.25)"/>
+        <rect x="268" y="0" width="16" height="380" fill="rgba(36,44,58,0.25)"/>
+        <path d="M 183 115 Q 235 115 262 115" stroke="#00c8ff" stroke-width="1" fill="none" opacity="0.5" class="fline" marker-end="url(#arr-c)"/>
+      </svg>
+
+      <div class="room" style="left:16px;top:16px;width:245px;height:126px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-green)"></div>
+          <span style="color:var(--accent-green)" id="c-team1">DEV ZONE</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-work">
+            <div class="d-dot" style="background:var(--accent-green)"></div>
+            <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">A1</div>
+            <div class="d-name" id="c-d1">前端实现</div>
+          </div>
+          <div class="desk s-think">
+            <div class="d-dot" style="background:var(--accent-amber)"></div>
+            <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">A2</div>
+            <div class="d-name" id="c-d2">接口设计</div>
+          </div>
+          <div class="desk s-idle">
+            <div class="d-dot" style="background:var(--text-muted)"></div>
+            <div class="d-avatar" style="background:var(--bg-panel);color:var(--text-muted)">A3</div>
+            <div class="d-name">待命</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="room" style="left:16px;top:168px;width:245px;height:105px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-cyan)"></div>
+          <span style="color:var(--accent-cyan)" id="c-team2">QA ZONE</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-think">
+            <div class="d-dot" style="background:var(--accent-amber)"></div>
+            <div class="d-avatar" style="background:rgba(255,181,71,0.18);color:var(--accent-amber)">B1</div>
+            <div class="d-name" id="c-d3">验收测试</div>
+          </div>
+          <div class="desk s-work">
+            <div class="d-dot" style="background:var(--accent-green)"></div>
+            <div class="d-avatar" style="background:rgba(0,229,160,0.18);color:var(--accent-green)">B2</div>
+            <div class="d-name" id="c-d4">自动化</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="room" style="left:292px;top:16px;width:148px;height:126px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-blue)"></div>
+          <span style="color:var(--accent-blue)" id="c-team3">DEVOPS</span>
+        </div>
+        <div class="room-body">
+          <div class="desk s-work">
+            <div class="d-dot" style="background:var(--accent-green)"></div>
+            <div class="d-avatar" style="background:rgba(77,124,254,0.18);color:var(--accent-blue)">C1</div>
+            <div class="d-name" id="c-d5">部署执行</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="room" style="left:292px;top:168px;width:148px;height:105px;">
+        <div class="room-hdr">
+          <div class="room-dot" style="background:var(--accent-amber)"></div>
+          <span style="color:var(--accent-amber)">会议室</span>
+        </div>
+        <div class="facility">
+          <div class="fac-icon">📋</div>
+          <div class="fac-label" id="c-meeting">待交接 × 2</div>
+        </div>
+      </div>
+
+      <div class="room" style="left:454px;top:16px;width:108px;height:80px;">
+        <div class="room-hdr"><span>服务器室</span></div>
+        <div class="facility"><div class="fac-icon">🖥️</div><div class="fac-label">MCP · 云资源</div></div>
+      </div>
+      <div class="room" style="left:454px;top:112px;width:108px;height:80px;">
+        <div class="room-hdr"><span>档案室</span></div>
+        <div class="facility"><div class="fac-icon">🗄️</div><div class="fac-label">知识库 · SKILL</div></div>
+      </div>
+
+      <div class="mover cyan" style="animation: mv-c1 9s ease-in-out infinite;">A1</div>
+    </div>
+
+    <!-- 右侧消息面板 -->
+    <div class="c-side">
+      <div class="c-side-hdr">实时消息流</div>
+      <div class="c-side-body scroll-area">
+        <div class="msg-row" style="padding:8px 14px">
+          <div class="m-av" style="background:rgba(0,229,160,0.15);color:var(--accent-green)">A1</div>
+          <div class="m-body">
+            <div class="m-from" id="c-msg1-from">前端 → QA</div>
+            <div class="m-text" id="c-msg1-text">已完成，等待测试指令</div>
+          </div>
+          <div class="m-time">刚刚</div>
+        </div>
+        <div class="msg-row" style="padding:8px 14px">
+          <div class="m-av" style="background:rgba(77,124,254,0.15);color:var(--accent-blue)">C1</div>
+          <div class="m-body">
+            <div class="m-from" id="c-msg2-from">DevOps → 全体</div>
+            <div class="m-text" id="c-msg2-text">staging 部署完成</div>
+          </div>
+          <div class="m-time">2m</div>
+        </div>
+        <div class="msg-row" style="padding:8px 14px">
+          <div class="m-av" style="background:rgba(0,200,255,0.15);color:var(--accent-cyan)">CEO</div>
+          <div class="m-body">
+            <div class="m-from">CEO → A1</div>
+            <div class="m-text" id="c-msg3-text">优先处理登录模块的安全问题</div>
+          </div>
+          <div class="m-time">5m</div>
+        </div>
+
+        <!-- CEO 发指令 -->
+        <div style="padding:8px 12px;border-top:1px solid var(--border);margin-top:4px">
+          <div class="panel-title">发送指令</div>
+          <div class="cmd-box" style="margin:0">
+            <div class="cmd-targets" id="c-targets">
+              <span class="badge badge-green" style="cursor:pointer">A1</span>
+              <span class="badge badge-cyan" style="cursor:pointer">B1</span>
+              <span class="badge badge-blue" style="cursor:pointer">C1</span>
+              <span class="badge" style="cursor:pointer;background:var(--bg-panel);color:var(--text-muted)">全体</span>
+            </div>
+            <div class="cmd-input" style="margin-top:6px">输入指令...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部通用流水线 -->
+  <div class="c-bottom">
+    <div class="c-bottom-hdr">
+      <span class="c-bottom-title">任务流水线 — <span id="pipeline-scene-label">软件开发</span></span>
+      <div class="pipeline-tabs">
+        <button class="pt-btn active" onclick="switchPipeline('p-dev')">当前项目</button>
+        <button class="pt-btn" onclick="switchPipeline('p-all')">全部任务</button>
+      </div>
+    </div>
+    <div class="pipeline-body">
+
+      <!-- 软件开发流水线 -->
+      <div class="pipeline active" id="p-dev-dev">
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--text-muted)"></div><span class="pl-stage-name">待认领</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title" id="pl-d-todo">用户权限模块</div><div class="pl-card-meta">未分配</div></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-amber)"></div><span class="pl-stage-name" id="pl-s1">开发中</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title" id="pl-d-s1c1">用户登录功能</div><div class="pl-card-meta">进行中</div><span class="pl-card-assignee">A1</span></div>
+            <div class="pl-card"><div class="pl-card-title" id="pl-d-s1c2">DB Schema</div><div class="pl-card-meta">进行中</div><span class="pl-card-assignee">A2</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-cyan)"></div><span class="pl-stage-name" id="pl-s2">测试中</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title" id="pl-d-s2c1">API 接口</div><div class="pl-card-meta">待审核</div><span class="pl-card-assignee">B1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-blue)"></div><span class="pl-stage-name" id="pl-s3">执行中</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title" id="pl-d-s3c1">v0.3.2 部署</div><div class="pl-card-meta">进行中</div><span class="pl-card-assignee">C1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-green)"></div><span class="pl-stage-name">已完成</span><span class="pl-stage-count">3</span></div>
+          <div class="pl-cards">
+            <div class="pl-card done"><div class="pl-card-title" id="pl-d-donec1">需求文档</div><div class="pl-card-meta">已归档</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内容创作流水线（默认隐藏，场景切换后显示） -->
+      <div class="pipeline" id="p-dev-content">
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--text-muted)"></div><span class="pl-stage-name">选题池</span><span class="pl-stage-count">3</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">AI 趋势分析</div><div class="pl-card-meta">待认领</div></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-amber)"></div><span class="pl-stage-name">资料收集</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">Q2 行业报告</div><div class="pl-card-meta">研究中</div><span class="pl-card-assignee">A1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-cyan)"></div><span class="pl-stage-name">撰写初稿</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">产品发布文案</div><div class="pl-card-meta">撰写中</div><span class="pl-card-assignee">A2</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-blue)"></div><span class="pl-stage-name">审核润色</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">官网首页文案</div><div class="pl-card-meta">审核中</div><span class="pl-card-assignee">B1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-green)"></div><span class="pl-stage-name">已发布</span><span class="pl-stage-count">5</span></div>
+          <div class="pl-cards">
+            <div class="pl-card done"><div class="pl-card-title">3月月报</div><div class="pl-card-meta">已归档</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 市场调研流水线 -->
+      <div class="pipeline" id="p-dev-research">
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--text-muted)"></div><span class="pl-stage-name">课题立项</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">竞品价格调研</div><div class="pl-card-meta">待认领</div></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-amber)"></div><span class="pl-stage-name">数据采集</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">用户访谈 × 20</div><div class="pl-card-meta">进行中 8/20</div><span class="pl-card-assignee">A1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-cyan)"></div><span class="pl-stage-name">数据分析</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">NPS 数据建模</div><div class="pl-card-meta">分析中</div><span class="pl-card-assignee">A2</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-blue)"></div><span class="pl-stage-name">报告撰写</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">Q1 市场洞察报告</div><div class="pl-card-meta">撰写中</div><span class="pl-card-assignee">B1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-green)"></div><span class="pl-stage-name">已交付</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card done"><div class="pl-card-title">竞品分析报告</div><div class="pl-card-meta">已归档</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 运营策划流水线 -->
+      <div class="pipeline" id="p-dev-ops">
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--text-muted)"></div><span class="pl-stage-name">策划立项</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">618 大促方案</div><div class="pl-card-meta">待认领</div></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-amber)"></div><span class="pl-stage-name">方案制定</span><span class="pl-stage-count">2</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">五一活动策划</div><div class="pl-card-meta">制定中</div><span class="pl-card-assignee">A1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-cyan)"></div><span class="pl-stage-name">素材制作</span><span class="pl-stage-count">3</span></div>
+          <div class="pl-cards">
+            <div class="pl-card hot"><div class="pl-card-title">Banner 设计</div><div class="pl-card-meta">制作中</div><span class="pl-card-assignee">A2</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-blue)"></div><span class="pl-stage-name">上线执行</span><span class="pl-stage-count">1</span></div>
+          <div class="pl-cards">
+            <div class="pl-card"><div class="pl-card-title">渠道投放配置</div><div class="pl-card-meta">执行中</div><span class="pl-card-assignee">C1</span></div>
+          </div>
+        </div>
+        <div class="pl-arrow">›</div>
+        <div class="pl-stage">
+          <div class="pl-stage-hdr"><div class="pl-stage-dot" style="background:var(--accent-green)"></div><span class="pl-stage-name">已复盘</span><span class="pl-stage-count">4</span></div>
+          <div class="pl-cards">
+            <div class="pl-card done"><div class="pl-card-title">Q1 运营总结</div><div class="pl-card-meta">已归档</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <script>
-  function switchScheme(id) {
-    document.querySelectorAll('.scheme-container').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('scheme-' + id).classList.add('active');
-    const btns = document.querySelectorAll('.tab-btn');
-    const idx = {a:0,b:1,c:2}[id];
-    btns[idx].classList.add('active');
+  // ===== 场景数据 =====
+  const scenes = {
+    dev: {
+      label: '软件开发',
+      team1: 'DEV ZONE', team2: 'QA ZONE', team3: 'DEVOPS',
+      d: ['前端实现','接口设计','API 测试','E2E 测试','部署执行'],
+      meeting: '待交接 × 2',
+      msg1from: '前端 → QA', msg1: '登录功能完成，分支 feat/login，请测试以下场景',
+      msg2from: 'DevOps → 全体', msg2: 'staging v0.3.2 部署完成',
+      msg3: '优先处理登录模块的安全问题',
+      t1: '用户登录功能', t1sub: 'A1 → B1 · 待测试',
+      t2: 'v0.3.2 部署', t2sub: 'C1 · 完成',
+      bubble: '前端完成，请测试',
+      stat: ['6 Agent 在线','3 任务进行中','2 待交接'],
+      pipeline: 'dev'
+    },
+    content: {
+      label: '内容创作',
+      team1: '创作团队', team2: '审核团队', team3: '发布团队',
+      d: ['资料收集','初稿撰写','内容审核','SEO 优化','发布执行'],
+      meeting: '待审核稿件 × 3',
+      msg1from: '撰写 → 审核', msg1: '产品发布文案初稿完成，请审核',
+      msg2from: '发布 → 全体', msg2: '官网首页文案已上线',
+      msg3: '加快 Q2 行业报告的撰写进度',
+      t1: '产品发布文案', t1sub: 'A2 → B1 · 待审核',
+      t2: '官网首页文案', t2sub: 'C1 · 已发布',
+      bubble: '初稿完成，请审核',
+      stat: ['5 Agent 在线','4 任务进行中','3 待审核'],
+      pipeline: 'content'
+    },
+    research: {
+      label: '市场调研',
+      team1: '调研团队', team2: '分析团队', team3: '交付团队',
+      d: ['用户访谈','数据采集','数据建模','报告撰写','交付审阅'],
+      meeting: '待确认报告 × 1',
+      msg1from: '调研 → 分析', msg1: '用户访谈 20 份已完成，请开始数据分析',
+      msg2from: '分析 → 全体', msg2: 'NPS 建模完成，可开始撰写报告',
+      msg3: '重点关注用户留存率的下滑原因',
+      t1: '用户访谈 × 20', t1sub: 'A1 → A2 · 分析中',
+      t2: '竞品分析报告', t2sub: 'B1 · 已交付',
+      bubble: '访谈完成，移交分析',
+      stat: ['4 Agent 在线','2 任务进行中','1 待确认'],
+      pipeline: 'research'
+    },
+    ops: {
+      label: '运营策划',
+      team1: '策划团队', team2: '设计团队', team3: '执行团队',
+      d: ['方案策划','素材制作','渠道配置','投放执行','数据监控'],
+      meeting: '待确认方案 × 2',
+      msg1from: '策划 → 设计', msg1: '五一活动方案已确认，请开始制作 Banner',
+      msg2from: '执行 → 全体', msg2: '渠道投放配置完成，活动已上线',
+      msg3: '本次活动重点关注新用户注册转化',
+      t1: '五一活动策划', t1sub: 'A1 → A2 · 制作中',
+      t2: 'Q1 运营总结', t2sub: 'B1 · 已复盘',
+      bubble: '方案已确认，开始制作',
+      stat: ['5 Agent 在线','3 任务进行中','2 待确认'],
+      pipeline: 'ops'
+    }
+  };
+
+  let currentScene = 'dev';
+  let currentScheme = 'a';
+
+  function switchScheme(s) {
+    currentScheme = s;
+    document.querySelectorAll('.scheme').forEach(el => el.classList.remove('active'));
+    document.getElementById('scheme-' + s).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['a','b','c'][i] === s);
+    });
+  }
+
+  function switchScene(scene) {
+    currentScene = scene;
+    document.querySelectorAll('.scene-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['dev','content','research','ops'][i] === scene);
+    });
+    applyScene(scene);
+  }
+
+  function applyScene(scene) {
+    const d = scenes[scene];
+    // label
+    const lbl = document.getElementById('pipeline-scene-label');
+    if (lbl) lbl.textContent = d.label;
+
+    // 方案 A
+    ['a-team-name','b-team1','c-team1'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.team1; });
+    ['a-team2-name','b-team2','c-team2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.team2; });
+    ['a-team3-name','b-team3','c-team3'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.team3; });
+
+    const dIds = [['a-d1','b-d1','c-d1'],['a-d2','b-d2','c-d2'],['a-d3','b-d3','c-d3'],['a-d4','b-d4','c-d4'],['a-d5','b-d5','c-d5']];
+    dIds.forEach((group, i) => {
+      group.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.d[i]; });
+    });
+
+    ['a-meeting-txt','b-meeting','c-meeting'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.meeting; });
+
+    // 消息
+    [['a-msg1-from','b-msg1-from','c-msg1-from']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.msg1from; }));
+    [['a-msg1-text','b-msg1-text','c-msg1-text']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.msg1; }));
+    [['a-msg2-from','b-msg2-from','c-msg2-from']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.msg2from; }));
+    [['a-msg2-text','b-msg2-text','c-msg2-text']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.msg2; }));
+    const cm3 = document.getElementById('c-msg3-text'); if(cm3) cm3.textContent = d.msg3;
+
+    // 任务
+    [['a-t1','b-t1']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.t1; }));
+    [['a-t1-sub','b-t1-sub']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.t1sub; }));
+    [['a-t2','b-t2']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.t2; }));
+    [['a-t2-sub','b-t2-sub']].forEach(g => g.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = d.t2sub; }));
+
+    // 气泡
+    const bubble = document.getElementById('a-bubble'); if(bubble) bubble.textContent = d.bubble;
+
+    // 状态栏
+    const s1 = document.getElementById('b-stat1'); if(s1) s1.textContent = d.stat[0];
+    const s2 = document.getElementById('b-stat2'); if(s2) s2.textContent = d.stat[1];
+    const s3 = document.getElementById('b-stat3'); if(s3) s3.textContent = d.stat[2];
+
+    // 流水线切换
+    document.querySelectorAll('.pipeline').forEach(el => el.classList.remove('active'));
+    const pipe = document.getElementById('p-dev-' + d.pipeline);
+    if (pipe) pipe.classList.add('active');
+  }
+
+  function switchPipeline(tab) {
+    document.querySelectorAll('.pt-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
   }
 </script>
-
 </body>
 </html>
