@@ -391,6 +391,21 @@ OFFICE_ROOT=/path/to/office
 
 CLAUDE.md 中的所有文件操作都通过这两个变量定位，不硬编码路径。
 
+### 11.5 原生 Claude Code 隔离保障
+
+**核心原则：Hook 和 CLAUDE.md 只在 Agent 专属工作目录生效，不影响原生使用。**
+
+- Claude Code Hooks 采用**项目级配置**，写入 `[agentWorkDir]/.claude/settings.json`
+- CLAUDE.md 同为项目级，只对该目录下启动的 Claude Code 有效
+- 全局配置文件 `~/.claude/settings.json` 不写入任何系统内容
+- 日常随手开启的 Claude Code 窗口（在其他目录）原生行为 100% 保留
+
+**Agent 工作目录规范（创建时强制执行）：**
+- 系统为每个 Agent 创建独立的专属工作目录（如 `/office-agents/team-frontend/`）
+- 不允许将已有代码仓库目录设为 Agent 工作目录
+- Agent 通过配置读取目标代码目录路径，而不是直接住在代码仓库内
+- 好处：代码仓库中随时开 Claude Code 做小任务，不触发任何系统逻辑
+
 ---
 
 ## 十、实施优先级（待最终确认）
